@@ -1,0 +1,111 @@
+html, body{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background: linear-gradient(315deg, #1B1B1B 0%, #003153 100%);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.form-area,.counter,.complete{
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px #213f52;
+    background-color: white;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10%;
+
+
+}
+
+.form-area input{
+    display: block;
+    margin: 15px;
+    padding: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
+    width: 300px;
+
+}
+
+.form-area{
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+button{
+    background-color: rgb(0, 81, 255);
+    width: 100%;
+    padding: 15px;
+    border: none;
+    color:white;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+button:hover{
+    background-color: rgb(0, 42, 253);
+    cursor: pointer;
+
+
+}
+
+.counter h1{
+    text-align: center;
+    font-size: 40px;
+    color: rgba(0, 0, 0, 0.93);
+    margin-top: 5px;
+}
+
+
+li{
+    display: inline-block;
+    font-size: 30px;
+    list-style-type: none;
+    padding: 10px;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.86);
+}
+
+li span{
+    display: block;
+    font-size: 80px;
+    text-align: center;
+
+}
+
+.complete-title{
+    animation: complete 4s infinite;
+    text-align: center;
+}
+
+@keyframes complete {
+    0%{
+        color: red;
+    }
+    25%{
+        color: yellow;
+        transform: rotate(5deg);
+    }
+    50%{
+        color: green;
+        transform: scale(1.2);
+    }
+    75%{
+        color: blue;
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        color: red;
+        transform: rotate(0);
+        transform: scale(1);
+    }
+
+}
