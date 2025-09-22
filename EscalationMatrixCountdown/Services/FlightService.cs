@@ -10,39 +10,12 @@ namespace EscalationMatrixCountdown.Services
 
         public FlightsService()
         {
-            // Hard-coded sample flights
-            _flights.Add(new Flight
-            {
-                Id = System.Guid.NewGuid().ToString(),
-                Name = "IAH",
-                TimeOfDay = "13:38",
-                Finger = 3,
-                IsActive = true
-            });
-
-            _flights.Add(new Flight
-            {
-                Id = System.Guid.NewGuid().ToString(),
-                Name = "PIT",
-                TimeOfDay = "14:30",
-                Finger = 1,
-                IsActive = true
-            });
-
-            _flights.Add(new Flight
-            {
-                Id = System.Guid.NewGuid().ToString(),
-                Name = "CVG",
-                TimeOfDay = "15:21",
-                Finger = 2,
-                IsActive = true
-            });
+            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "IAH", TimeOfDay = "13:38", Finger = 3, IsActive = true });
+            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "PIT", TimeOfDay = "14:30", Finger = 1, IsActive = true });
+            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "CVG", TimeOfDay = "15:21", Finger = 2, IsActive = true });
         }
 
-        public IReadOnlyList<Flight> GetAll()
-        {
-            return _flights;
-        }
+        public IReadOnlyList<Flight> GetAll() { return _flights; }
 
         public void Add(Flight f)
         {
@@ -58,18 +31,12 @@ namespace EscalationMatrixCountdown.Services
             if (found != null) _flights.Remove(found);
         }
 
-        // These two methods are no longer needed for TimeOfDay logic,
-        // but you can keep placeholders for compatibility if referenced elsewhere
-        public Flight GetNext(System.DateTime nowLocal)
+        public void Update(Flight f)
         {
-            // Let Home.razor handle next flight calculation
-            return null;
-        }
-        
-        public Flight GetNextByFinger(System.DateTime nowLocal, int finger)
-        {
-            // Let Home.razor handle next flight calculation
-            return null;
+            if (f == null) return;
+            if (string.IsNullOrWhiteSpace(f.Id)) return;
+            var i = _flights.FindIndex(x => x.Id == f.Id);
+            if (i >= 0) _flights[i] = f;
         }
     }
 }

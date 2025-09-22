@@ -4,8 +4,9 @@ namespace EscalationMatrixCountdown.Models
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
-        public int Finger { get; set; } = 1;     // 1..3
-        public string TimeOfDay { get; set; } = ""; // "HH:mm" local
+        public int Finger { get; set; } = 1;
+        public string TimeOfDay { get; set; } = ""; // "HH:mm"
         public bool IsActive { get; set; } = true;
+        public AircraftType Type { get; set; } = AircraftType.B767_300;
     }
 }
