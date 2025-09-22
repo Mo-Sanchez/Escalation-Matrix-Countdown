@@ -1,5 +1,248 @@
 ﻿@page "/"
+@using System.Globalization
+@using EscalationMatrixCountdown.Models
+@implements IDisposable
+@inject EscalationMatrixCountdown.Services.FlightsService Flights
+@inject IJSRuntime JS
 
-<h3>ULD Countdown</h3>
+@if (!kiosk)
+{
+<div class="page-wrap">
+    <h3>ULD Countdown</h3>
 
-<p>This will be our main page.</p>
+    <p>
+        Finger:
+        <button @onclick="() => SetFinger(1)">1</button>
+        <button @onclick="() => SetFinger(2)">2</button>
+        <button @onclick="() => SetFinger(3)">3</button>
+        <button style="margin-left:12px" @onclick="EnterKiosk">Enter Kiosk</button>
+    </p>
+
+    @if (hasDeparture)
+    {
+        <div class="metrics">
+            <p><strong>Flight:</strong> @activeFlightName (Finger @selectedFinger)</p>
+            <p><strong>Next Due:</strong> @nextLabel @nextDueLocal.ToString("HH:mm")</p>
+            <p><strong>Departure:</strong> @departureLocal.ToString("yyyy-MM-dd HH:mm")</p>
+            <p><strong>Now:</strong> @nowLocal.ToString("yyyy-MM-dd HH:mm:ss")</p>
+        </div>
+
+        <p class="countdown" style="color:@currentColor">Time Remaining: @remainingText</p>
+
+        <table class="table-big">
+            <thead><tr><th>Item</th><th>Due</th><th>Remaining</th></tr></thead>
+            <tbody>
+            @for (var i = 0; i < cfg.StringOffsetsMinutes.Length; i++)
+            {
+                var label = Labels[i];
+                var due = DueTime(cfg.StringOffsetsMinutes[i]);
+                var rem = due - nowLocal;
+                var rowColor = "inherit";
+                if (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) rowColor = "red";
+                <tr style="color:@rowColor"><td>@label</td><td>@due.ToString("HH:mm")</td><td>@FormatSpan(rem)</td></tr>
+            }
+            @{
+                var lcoDue = DueTime(cfg.LastCanOffsetMinutes);
+                var lcoRem = lcoDue - nowLocal;
+                var lcoColor = "inherit";
+                if (lcoRem.TotalSeconds >= 0 && lcoRem.TotalMinutes <= 10) lcoColor = "red";
+            }
+            <tr style="color:@lcoColor"><td>Last Can (LCO)</td><td>@lcoDue.ToString("HH:mm")</td><td>@FormatSpan(lcoRem)</td></tr>
+            </tbody>
+        </table>
+    }
+</div>
+}
+else
+{
+<div class="kiosk">
+    <div class="extraSmall muted">Finger @selectedFinger</div>
+    <div class="mid">@activeFlightName</div>
+    <div class="small muted">Next: @nextLabel @nextDueLocal.ToString("HH:mm")</div>
+    <div class="big" style="color:@currentColor">@remainingText</div>
+
+    <div style="margin-top:18px">
+        <button @onclick="ExitKiosk">Exit Kiosk</button>
+        <button @onclick="() => SetFinger(1)">1</button>
+        <button @onclick="() => SetFinger(2)">2</button>
+        <button @onclick="() => SetFinger(3)">3</button>
+    </div>
+</div>
+}
+
+@code {
+    private string activeFlightName = "";
+    private int selectedFinger = 1;
+    private bool kiosk = false;
+
+    private static readonly string[] Labels =
+        { "1st String","2nd String","3rd String","4th String","5th String","6th String" };
+
+    private AircraftConfig cfg = new AircraftConfig
+    {
+        Name = "B767-300",
+        StringOffsetsMinutes = new [] { -100, -90, -80, -70, -60, -50 },
+        LastCanOffsetMinutes = -32
+    };
+
+    private System.DateTime departureLocal;
+    private bool hasDeparture;
+
+    private System.DateTime nowLocal = System.DateTime.Now;
+    private string nextLabel = "";
+    private System.DateTime nextDueLocal;
+    private string remainingText = "";
+    private string currentColor = "inherit";
+
+    private System.Timers.Timer t = new System.Timers.Timer(1000);
+
+    protected override void OnInitialized()
+    {
+        t.Elapsed += (_, __) => InvokeAsync(Tick);
+        t.AutoReset = true;
+        t.Enabled = true;
+    }
+
+    private void EnterKiosk()
+    {
+        kiosk = true;
+        JS.InvokeVoidAsync("kiosk.enter");
+    }
+
+    private void ExitKiosk()
+    {
+        kiosk = false;
+        JS.InvokeVoidAsync("kiosk.exit");
+    }
+
+    private void SetFinger(int f)
+    {
+        selectedFinger = f;
+        hasDeparture = false;
+        activeFlightName = "";
+    }
+
+    private System.DateTime DueTime(int offsetMin)
+    {
+        return departureLocal.AddMinutes(offsetMin);
+    }
+
+    private static string FormatSpan(System.TimeSpan ts)
+    {
+        var sign = "";
+        if (ts.TotalSeconds < 0) sign = "-";
+        var abs = ts.Duration();
+        return sign + abs.Hours.ToString("00") + ":" + abs.Minutes.ToString("00") + ":" + abs.Seconds.ToString("00");
+    }
+
+    private void Tick()
+    {
+        nowLocal = System.DateTime.Now;
+
+        var flights = Flights.GetAll().Where(x => x.IsActive && x.Finger == selectedFinger).ToList();
+
+        System.DateTime? currentOcc = null;
+        string currentName = "";
+
+        System.DateTime? nextOcc = null;
+        string nextName = "";
+
+        foreach (var f in flights)
+        {
+            if (string.IsNullOrWhiteSpace(f.TimeOfDay)) continue;
+
+            if (!System.DateTime.TryParseExact(
+                f.TimeOfDay,
+                "HH:mm",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var todParsed)) continue;
+
+            var occToday = new System.DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, todParsed.Hour, todParsed.Minute, 0);
+            var startWindow = occToday.AddMinutes(cfg.StringOffsetsMinutes[0]); 
+            var lco = occToday.AddMinutes(cfg.LastCanOffsetMinutes);           
+            var graceEnd = lco.AddMinutes(5);                                  
+
+            if (nowLocal >= startWindow && nowLocal <= graceEnd)
+            {
+                if (!currentOcc.HasValue || occToday > currentOcc.Value)
+                {
+                    currentOcc = occToday;
+                    currentName = f.Name;
+                }
+            }
+            else
+            {
+                var candidate = nowLocal < startWindow ? occToday : occToday.AddDays(1);
+                if (!nextOcc.HasValue || candidate < nextOcc.Value)
+                {
+                    nextOcc = candidate;
+                    nextName = f.Name;
+                }
+            }
+        }
+
+        if (currentOcc.HasValue)
+        {
+            departureLocal = currentOcc.Value;
+            hasDeparture = true;
+            activeFlightName = currentName;
+        }
+        else if (nextOcc.HasValue)
+        {
+            departureLocal = nextOcc.Value;
+            hasDeparture = true;
+            activeFlightName = nextName;
+        }
+        else
+        {
+            hasDeparture = false;
+            activeFlightName = "";
+            StateHasChanged();
+            return;
+        }
+
+        var bestLabel = "";
+        var bestDue = System.DateTime.MaxValue;
+
+        for (var i = 0; i < cfg.StringOffsetsMinutes.Length; i++)
+        {
+            var label = Labels[i];
+            var due = DueTime(cfg.StringOffsetsMinutes[i]);
+            if (due >= nowLocal && due < bestDue)
+            {
+                bestDue = due;
+                bestLabel = label;
+            }
+        }
+
+        var lcoDue = DueTime(cfg.LastCanOffsetMinutes);
+        if (lcoDue >= nowLocal && lcoDue < bestDue)
+        {
+            bestDue = lcoDue;
+            bestLabel = "Last Can (LCO)";
+        }
+
+        nextLabel = bestLabel;
+        nextDueLocal = bestDue;
+
+        if (bestLabel == "")
+        {
+            remainingText = "00:00:00";
+            currentColor = "inherit";
+        }
+        else
+        {
+            var rem = nextDueLocal - nowLocal;
+            remainingText = FormatSpan(rem);
+            currentColor = (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) ? "red" : "inherit";
+        }
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        t?.Dispose();
+    }
+}

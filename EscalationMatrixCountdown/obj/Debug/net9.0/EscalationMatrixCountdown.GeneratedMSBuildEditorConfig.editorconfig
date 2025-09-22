@@ -28,16 +28,12 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/moise/Documents/git-repos/RiderProjects/EscalationMatrixCountdown/EscalationMatrixCountdown/Pages/Counter.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ291bnRlci5yYXpvcg==
+[C:/Users/moise/Documents/git-repos/RiderProjects/EscalationMatrixCountdown/EscalationMatrixCountdown/Pages/Admin.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/moise/Documents/git-repos/RiderProjects/EscalationMatrixCountdown/EscalationMatrixCountdown/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/moise/Documents/git-repos/RiderProjects/EscalationMatrixCountdown/EscalationMatrixCountdown/Pages/Weather.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcV2VhdGhlci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/moise/Documents/git-repos/RiderProjects/EscalationMatrixCountdown/EscalationMatrixCountdown/_Imports.razor]

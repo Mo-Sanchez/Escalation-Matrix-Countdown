@@ -1,0 +1,107 @@
+﻿@page "/admin"
+@using System.Globalization
+@using EscalationMatrixCountdown.Models
+@inject EscalationMatrixCountdown.Services.FlightsService Flights
+
+<h3>Admin — Daily Flights</h3>
+
+<div>
+    <label>Flight Name:</label>
+    <input @bind="name" @bind:event="oninput" />
+</div>
+
+<div>
+    <label>Time (HH:mm):</label>
+    <input @bind="timeText" @bind:event="oninput" />
+</div>
+
+<div>
+    <label>Finger:</label>
+    <select @bind="finger">
+        <option value="1">Finger 1</option>
+        <option value="2">Finger 2</option>
+        <option value="3">Finger 3</option>
+    </select>
+</div>
+
+<button @onclick="AddFlight">Add</button>
+
+@if (!string.IsNullOrEmpty(msg))
+{
+    <p style="color:red">@msg</p>
+}
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Time</th>
+            <th>Finger</th>
+            <th>Active</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var f in Flights.GetAll().OrderBy(x => x.Finger).ThenBy(x => x.TimeOfDay))
+    {
+        <tr>
+            <td>@f.Name</td>
+            <td>@f.TimeOfDay</td>
+            <td>@f.Finger</td>
+            <td>@(f.IsActive ? "Yes" : "No")</td>
+            <td><button @onclick="(() => DeleteFlight(f.Id))">Delete</button></td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    private string name = "";
+    private string timeText = "";
+    private string msg = "";
+    private int finger = 1;
+
+    private void AddFlight()
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            msg = "Name required.";
+            return;
+        }
+
+        System.DateTime dummy;
+        var ok = System.DateTime.TryParseExact(
+            timeText,
+            "HH:mm",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out dummy);
+
+        if (!ok)
+        {
+            msg = "Invalid time. Use HH:mm (24-hour).";
+            return;
+        }
+
+        var id = System.Guid.NewGuid().ToString("N");
+        var f = new Flight
+        {
+            Id = id,
+            Name = name.Trim(),
+            Finger = finger,
+            TimeOfDay = timeText.Trim(),
+            IsActive = true
+        };
+
+        Flights.Add(f);
+        msg = "";
+        name = "";
+        timeText = "";
+        finger = 1;
+    }
+
+    private void DeleteFlight(string id)
+    {
+        Flights.Remove(id);
+    }
+}

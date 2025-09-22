@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "EscalationMatrixCountdown",
   "resources": {
-    "hash": "sha256-BYWxQY8+iTzYCYYJnsdiOPRdt4+dcCb/BsmsPuXV5hk=",
+    "hash": "sha256-Xh0V3UjUlrWewJds2aL2pZi6KkbXbyWsSPLRxcfPZGM=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Authorization.bvu82j4ad3.wasm": "Microsoft.AspNetCore.Authorization.wasm",
       "Microsoft.AspNetCore.Components.ptfrz3fits.wasm": "Microsoft.AspNetCore.Components.wasm",
@@ -201,8 +201,8 @@
       "icudt_CJK.tjcz0u77k5.dat": "icudt_CJK.dat",
       "icudt_EFIGS.tptq2av103.dat": "icudt_EFIGS.dat",
       "icudt_no_CJK.lfu7j35m59.dat": "icudt_no_CJK.dat",
-      "EscalationMatrixCountdown.j0m3q7orke.wasm": "EscalationMatrixCountdown.wasm",
-      "EscalationMatrixCountdown.nnd1w8mj6b.pdb": "EscalationMatrixCountdown.pdb"
+      "EscalationMatrixCountdown.mjsl4ze6vg.wasm": "EscalationMatrixCountdown.wasm",
+      "EscalationMatrixCountdown.q0frlwz0yf.pdb": "EscalationMatrixCountdown.pdb"
     },
     "jsModuleNative": {
       "dotnet.native.st0ovrfdhi.js": "sha256-MBW/zayfv+YU6mhH7y4b8NNU4D1EYd7nf9gYrFshnnY="
@@ -412,10 +412,10 @@
       "WindowsBase.pg3o6xzigg.wasm": "sha256-dz62CHynC+zqTkbMOf3vm7YAhiRA8/pIoAwuqHfBL5M=",
       "mscorlib.jl2pswegra.wasm": "sha256-mSoCIDTdCQKTipW8VmFCypW/4AopZauaYRa8LoZdHvY=",
       "netstandard.uriri6ambh.wasm": "sha256-yuH/cvPd6r8N9nfPWihyckFD7hPFP+VQtQQxEqi7HIQ=",
-      "EscalationMatrixCountdown.j0m3q7orke.wasm": "sha256-M6hNDOhOSAlb+EinW6tqZ+exkzxkdZLnul18w6EUqcM="
+      "EscalationMatrixCountdown.mjsl4ze6vg.wasm": "sha256-wtPBDpZM/4kZBn2cdd1SFLwWmZoW27FbbGFKqgTquVU="
     },
     "pdb": {
-      "EscalationMatrixCountdown.nnd1w8mj6b.pdb": "sha256-Y1vG7tSaTewIHNbPJtm9oQN1RDVyf92NuKcp7w/Hhu4="
+      "EscalationMatrixCountdown.q0frlwz0yf.pdb": "sha256-NpYQHugv9HnXE3upbMqO2dNUXJqzxn82Ez6WiuoL8KM="
     }
   },
   "cacheBootResources": true,

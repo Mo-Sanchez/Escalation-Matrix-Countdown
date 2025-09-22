@@ -112,3 +112,28 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+/* TV scale (normal page) */
+.page-wrap { font-size: 28px; line-height: 1.25; }
+.page-wrap h3 { font-size: 56px; margin: 0 0 12px; }
+.metrics p { margin: 0; font-size: 36px; }
+.countdown { font-size: 80px; font-weight: 800; }
+.table-big th, .table-big td { padding: 10px 16px; font-size: 28px; }
+
+/* Kiosk mode typography */
+.kiosk { font-size: 48px; }
+
+.kiosk .big { font-size: 280px; font-weight: 900; }
+.kiosk .mid { font-size: 168px; font-weight: 700; }
+.kiosk .small { font-size: 148px; }
+.kiosk .extraSmall { font-size: 90px; }
+.kiosk .muted { opacity: 0.7; }
+
+/* Kiosk layout: remove nav and top bar, make content full-width */
+.kiosk-mode .sidebar { display: none !important; }
+.kiosk-mode .top-row { display: none !important; }
+.kiosk-mode .main,
+.kiosk-mode main,
+.kiosk-mode .content { margin: 0 !important; padding: 16px !important; width: 100% !important; }
+

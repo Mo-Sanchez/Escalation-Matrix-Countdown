@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EscalationMatrixCountdown")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e66a3d8c49bd8b51309c74fcddf761611c93d535")]
 [assembly: System.Reflection.AssemblyProductAttribute("EscalationMatrixCountdown")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EscalationMatrixCountdown")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
