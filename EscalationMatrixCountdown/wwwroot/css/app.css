@@ -28,7 +28,7 @@
 /* ------------------- */
 /* Default bits kept */
 /* ------------------- */
-code { color: #c02d76; }
+code { color: #8B0000; } /*//#8B0000 //#c02d76; */
 .form-floating > .form-control-plaintext { color: var(--bs-secondary-color); text-align: end; }
 .form-floating > .form-control-plaintext:focus { text-align: start; }
 
@@ -77,9 +77,10 @@ code { color: #c02d76; }
 /* KIOSK MODE (unchanged sizes) */
 /* ------------------- */
 .kiosk { font-size: 48px; }
-.kiosk .big { font-size: 140px; font-weight: 900; }
-.kiosk .mid { font-size: 88px; font-weight: 700; }
-.kiosk .small { font-size: 48px; }
+.kiosk .big { font-size: 244px; font-weight: 900; }
+.kiosk .mid { font-size: 168px; font-weight: 700; }
+.kiosk .small { font-size: 92px; }
+.kiosk .extraSmall { font-size: 68px; }
 .kiosk .muted { opacity: 0.7; }
 
 

@@ -5,6 +5,9 @@
 @inject EscalationMatrixCountdown.Services.FlightsService Flights
 @inject IJSRuntime JS
 
+
+
+
 @if (!kiosk)
 {
 <div class="tv-wrap">
@@ -103,9 +106,9 @@
 else
 {
 <div class="kiosk">
-    <div class="small muted">Finger @selectedFinger</div>
-    <div class="mid">@activeFlightName • @ActiveTypeName()</div>
-    <div class="small muted">Next: @nextLabel @nextDueLocal.ToString("HH:mm")</div>
+    <div class="extraSmall muted">Finger @selectedFinger</div>
+    <div class="small">@activeFlightName • @ActiveTypeName()</div>
+    <div class="mid muted">Next: @nextLabel @nextDueLocal.ToString("HH:mm")</div>
     <div class="big" style="color:@currentColor">@remainingText</div>
 
     <div style="margin-top:18px">
@@ -118,6 +121,9 @@ else
 }
 
 @code {
+    
+    /*#ToDo: Add next button in home and kiosk page to skip flight
+    #Integrade the supabase database https://supabase.com/dashboard/project/wmygobbzqaxyopukzxkd*/
     private string activeFlightName = "";
     private int selectedFinger = 1;
     private bool kiosk = false;
