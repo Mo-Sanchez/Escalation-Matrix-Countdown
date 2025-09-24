@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscalationMatrixCountdown", "EscalationMatrixCountdown\EscalationMatrixCountdown.csproj", "{C224A6C7-7426-4CEA-8F6D-144663C53782}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscalationMatrixCountdown", "EscalationMatrixCountdown.csproj", "{B900DBEC-FF4C-4A74-978F-85C75116DF9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C224A6C7-7426-4CEA-8F6D-144663C53782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C224A6C7-7426-4CEA-8F6D-144663C53782}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C224A6C7-7426-4CEA-8F6D-144663C53782}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C224A6C7-7426-4CEA-8F6D-144663C53782}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B900DBEC-FF4C-4A74-978F-85C75116DF9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B900DBEC-FF4C-4A74-978F-85C75116DF9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B900DBEC-FF4C-4A74-978F-85C75116DF9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B900DBEC-FF4C-4A74-978F-85C75116DF9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

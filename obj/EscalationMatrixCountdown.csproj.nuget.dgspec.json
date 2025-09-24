@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj": {}
+    "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj": {}
   },
   "projects": {
-    "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj": {
+    "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj",
+        "projectUniqueName": "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj",
         "projectName": "EscalationMatrixCountdown",
-        "projectPath": "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj",
+        "projectPath": "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown.csproj",
         "packagesPath": "C:\\Users\\moise\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\EscalationMatrixCountdown\\obj\\",
+        "outputPath": "C:\\Users\\moise\\Documents\\git-repos\\RiderProjects\\EscalationMatrixCountdown\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
