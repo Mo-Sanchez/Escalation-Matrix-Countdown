@@ -10,8 +10,8 @@ namespace EscalationMatrixCountdown.Services
 
         public FlightsService()
         {
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "IAH", TimeOfDay = "23:38", Finger = 3, IsActive = true, Type = AircraftType.B737_800 });
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "PIT", TimeOfDay = "23:30", Finger = 1, IsActive = true, Type = AircraftType.B767_300 });
+            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "IAH", TimeOfDay = "23:38", Finger = 3, IsActive = true, Type = AircraftType.B767_300 });
+            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "PIT", TimeOfDay = "23:30", Finger = 1, IsActive = true, Type = AircraftType.B737_800 });
             _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "CVG", TimeOfDay = "07:21", Finger = 1, IsActive = true, Type = AircraftType.B737_800 });
         }
 
