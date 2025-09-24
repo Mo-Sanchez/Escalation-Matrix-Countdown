@@ -1,15 +1,10 @@
-# Simple workflow to build and deploy a Blazor WebAssembly app to GitHub Pages
 name: Deploy Escalation-Matrix-Countdown to GitHub Pages
 
 on:
-  # Runs on pushes targeting the main branch
   push:
     branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -22,10 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # New step to automatically change the base path for deployment
+      - name: Rewrite base href for GitHub Pages
+        run: sed -i 's/<base href="\/" \/>/<base href="\/Escalation-Matrix-Countdown\/" \/>/' wwwroot/index.html
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x # Using .NET 8, as per your project
+          dotnet-version: 9.0.x
+          include-prerelease: true
 
       - name: Publish .NET Project
         run: dotnet publish EscalationMatrixCountdown.csproj -c Release -o release --nologo

@@ -1484,11 +1484,7 @@ C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\D
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\icudt_CJK.tjcz0u77k5.dat.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\icudt_EFIGS.tptq2av103.dat.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\icudt_no_CJK.lfu7j35m59.dat.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.8n1o2lc69r.wasm
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.i40rxngldv.pdb
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\blazor.boot.json
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.8n1o2lc69r.wasm.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.i40rxngldv.pdb.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\blazor.boot.json.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\EscalationMatrixCountdown.staticwebassets.runtime.json
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\EscalationMatrixCountdown.staticwebassets.endpoints.json
@@ -1905,7 +1901,6 @@ C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\D
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\blazor.boot.json
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\2ttze4ouf3-l90b95q4lk.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\8ibefn5x7i-s6aih3yiqh.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\i2mxlxlqho-hq0l3jqbh0.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\c82tqqn04p-2b8nh8sln5.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\7dbvug0sli-t1cqhe9u97.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\uvx3n714cv-c2jlpeoesf.gz
@@ -2154,9 +2149,6 @@ C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\D
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\bqn2yb8r0b-tjcz0u77k5.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\gs3s265cry-tptq2av103.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\mdoa1lw37b-lfu7j35m59.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\4xtot7mzrk-8n1o2lc69r.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\rfk9n9agx8-i40rxngldv.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\7dfri0g7eh-xinc6r23wx.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\staticwebassets.build.json
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\staticwebassets.build.json.cache
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\staticwebassets.development.json
@@ -2166,3 +2158,11 @@ C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\D
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\refint\EscalationMatrixCountdown.dll
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\EscalationMatrixCountdown.pdb
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\ref\EscalationMatrixCountdown.dll
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.hqldkyoapf.wasm
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.nbu0ms61n1.pdb
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.hqldkyoapf.wasm.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.nbu0ms61n1.pdb.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\4xtot7mzrk-hqldkyoapf.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\rfk9n9agx8-nbu0ms61n1.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\7dfri0g7eh-lswk6q31un.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\i2mxlxlqho-72hq9zzd4s.gz
