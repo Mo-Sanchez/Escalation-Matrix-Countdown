@@ -15,4 +15,8 @@
       <Folder Include="wwwroot\sample-data\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include=".github\workflows\deploy.yml" />
+    </ItemGroup>
+
 </Project>
