@@ -1,9 +1,12 @@
 ﻿@page "/"
+@page "/Finger{FingerNumber}"
+
 @using System.Globalization
 @using EscalationMatrixCountdown.Models
 @implements IDisposable
 @inject EscalationMatrixCountdown.Services.FlightsService Flights
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 @if (!kiosk)
 {
@@ -24,10 +27,10 @@
         <div class="control-group">
             <label>Finger:</label>
             <div class="btn-group">
-                <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("1")'>1</button>
-                <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("2")'>2</button>
-                <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("3")'>3</button>
-                <button class="btn @(selectedFinger == "All" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("All")'>All</button>
+                <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/Finger1")'>1</button>
+                <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/Finger2")'>2</button>
+                <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/Finger3")'>3</button>
+                <button class="btn @(selectedFinger == "All" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/")'>All</button>
             </div>
         </div>
         <div class="control-group">
@@ -159,14 +162,17 @@ else
         }
         <div class="kiosk-controls">
             <button class="btn btn-secondary" @onclick="ExitKiosk">Exit Kiosk</button>
-            <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-light")" @onclick='() => SetFinger("1")'>1</button>
-            <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-light")" @onclick='() => SetFinger("2")'>2</button>
-            <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-light")" @onclick='() => SetFinger("3")'>3</button>
+            <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("/Finger1")'>1</button>
+            <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("/Finger2")'>2</button>
+            <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("/Finger3")'>3</button>
         </div>
     </div>
 }
 
 @code {
+    [Parameter]
+    public string FingerNumber { get; set; }
+
     public class FlightDisplayInfo
     {
         public string FlightName { get; set; } = "";
@@ -187,14 +193,12 @@ else
     }
 
     private string? manuallySelectedFlightID = "";
-    private string selectedFinger = "1";
+    private string selectedFinger = "All"; // Default to "All"
     private bool kiosk = false;
     private bool showNextFourHoursOnly = false;
 
     private List<Flight> _allFlights = new();
     private List<FlightDisplayInfo> displayedFlights = new();
-    // REMOVED: No longer need a separate dictionary for configs
-    // private Dictionary<string, AircraftConfigRow> _configs = new(); 
     private Dictionary<string, List<AircraftMilestoneRow>> _milestones = new();
 
     private DateTime nowLocal = DateTime.Now;
@@ -207,14 +211,25 @@ else
         var types = new[] { "B767_300", "B737_800" };
         foreach (var typeKey in types)
         {
-            // REMOVED: No longer loading configs
-            // _configs[typeKey] = await Flights.GetAircraftConfigAsync(typeKey);
             _milestones[typeKey] = (await Flights.GetMilestonesAsync(typeKey)).OrderBy(m => m.OffsetMinutes).ToList();
         }
 
         t.Elapsed += async (_, __) => await InvokeAsync(Tick);
         t.AutoReset = true;
         t.Enabled = true;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(FingerNumber) && (FingerNumber == "1" || FingerNumber == "2" || FingerNumber == "3"))
+        {
+            selectedFinger = FingerNumber;
+        }
+        else
+        {
+            selectedFinger = "All";
+        }
+        manuallySelectedFlightID = ""; // Reset manual selection when route changes
     }
 
     private void EnterKiosk() { kiosk = true; JS.InvokeVoidAsync("kiosk.enter"); }
@@ -225,11 +240,8 @@ else
         manuallySelectedFlightID = e.Value?.ToString();
     }
 
-    private void SetFinger(string f)
-    {
-        selectedFinger = f;
-        manuallySelectedFlightID = "";
-    }
+    // The SetFinger method is no longer needed as navigation handles this
+    // private void SetFinger(string f) { ... }
 
     private async Task Tick()
     {
@@ -264,8 +276,7 @@ else
                 
                 var typeKey = f.Type == AircraftType.B737_800 ? "B737_800" : "B767_300";
                 if(!_milestones.ContainsKey(typeKey) || !_milestones[typeKey].Any()) continue;
-
-                // MODIFIED: Determine the start window from the earliest milestone instead of the config
+                
                 var earliestOffset = _milestones[typeKey].First().OffsetMinutes;
                 var startWindow = occToday.AddMinutes(earliestOffset);
                 var graceEnd = occToday.AddMinutes(5);
@@ -303,7 +314,6 @@ else
         StateHasChanged();
     }
 
-    // MODIFIED: This method is now much simpler
     private FlightDisplayInfo CalculateDisplayInfo(Flight flight, DateTime departureLocal)
     {
         var typeKey = flight.Type == AircraftType.B737_800 ? "B737_800" : "B767_300";
@@ -313,13 +323,11 @@ else
         string bestLabel = "";
         DateTime bestDue = DateTime.MaxValue;
         
-        // A single loop now handles all milestones
         foreach(var m in milestones)
         {
             var due = departureLocal.AddMinutes(m.OffsetMinutes);
             allMilestones.Add(new MilestoneInfo { Label = m.Label, Due = due });
-
-            // Check if this is the next upcoming milestone
+            
             if (due >= nowLocal && due < bestDue)
             {
                 bestDue = due;
@@ -348,7 +356,7 @@ else
             NextDueLocal = bestDue,
             RemainingText = remainingText,
             CurrentColor = currentColor,
-            Milestones = allMilestones // The list is already sorted by due time from the OffsetMinutes sort
+            Milestones = allMilestones
         };
     }
 

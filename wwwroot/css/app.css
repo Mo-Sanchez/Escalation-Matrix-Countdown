@@ -309,3 +309,8 @@ code { color: #8B0000; }
     color: #9b1c1c !important;
     font-weight: 700;
 }
+
+:focus {
+    outline: none;
+    box-shadow: none;
+}
