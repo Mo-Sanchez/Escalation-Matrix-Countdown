@@ -3,16 +3,24 @@
 @using EscalationMatrixCountdown.Models
 @inject EscalationMatrixCountdown.Services.FlightsService Flights
 
-<h3>Admin — Daily Flights</h3>
-
-<div style="display:flex; gap:8px; margin-bottom:12px">
-    <button @onclick="() => { tab = AdminTab.FlightSchedule; }">Flight Schedule</button>
-    <button @onclick="() => { tab = AdminTab.EscalationTimes; }" @onclick:preventDefault="false" />
-    <button @onclick="async () => { tab = AdminTab.EscalationTimes; await LoadEscAsync(); }">Escalation Times</button>
-</div>
-
-@if (tab == AdminTab.FlightSchedule)
+@if (tab == AdminTab.None)
 {
+    <div style="display:flex; align-items:center; justify-content:center; height:70vh;">
+        <div style="display:flex; gap:24px; flex-wrap:wrap; justify-content:center;">
+            <button style="padding:18px 28px; font-size:18px; border-radius:12px;"
+                    @onclick="ShowFlightSchedule">✈️ Flight Schedule</button>
+            <button style="padding:18px 28px; font-size:18px; border-radius:12px;"
+                    @onclick="ShowEscalationTimes">⏱️ Escalation Times</button>
+        </div>
+    </div>
+}
+else if (tab == AdminTab.FlightSchedule)
+{
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px">
+        <h3 style="margin:0">Admin — Flight Schedule</h3>
+        <button @onclick="BackToMenu">← Back</button>
+    </div>
+
     <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px">
         <div>
             <label>Flight Name</label><br />
@@ -52,6 +60,7 @@
         {
             <div style="border:1px solid #ccc; border-radius:8px; padding:12px">
                 <h4 style="margin:0 0 8px 0">Finger @col</h4>
+
                 @{
                     var list = _adminFlights
                         .Where(x => x.IsActive && x.Finger == col)
@@ -65,23 +74,24 @@
                     }
                 }
 
-                @foreach (var f in _adminFlights.Where(x => x.IsActive && x.Finger == col).OrderBy(x => SortKey(x.TimeOfDay)).ThenBy(x => x.Name))
+                @foreach (var f in _adminFlights.Where(x => x.IsActive && x.Finger == col)
+                                               .OrderBy(x => SortKey(x.TimeOfDay))
+                                               .ThenBy(x => x.Name))
                 {
                     if (editingId == f.Id.ToString())
                     {
                         <div style="display:flex; gap:8px; align-items:center; margin:6px 0; flex-wrap:wrap">
-                            <input value="@editName" @oninput="e => editName = e.Value != null ? e.Value.ToString() : string.Empty" style="width:120px" />
-                            <input value="@editTime" @oninput="e => editTime = e.Value != null ? e.Value.ToString() : string.Empty" style="width:110px" />
-                            <select value="@((int)editAircraft)" @onchange="OnEditAircraftChanged">
-                                <option value="@((int)AircraftType.B767_300)">B767_300</option>
-                                <option value="@((int)AircraftType.B737_800)">B737_800</option>
+                            <input value="@editName" @oninput="e => editName = e.Value?.ToString() ?? string.Empty" style="width:140px" />
+                            <input value="@editTime" @oninput="e => editTime = e.Value?.ToString() ?? string.Empty" style="width:110px" />
+                            <select @bind="editAircraft">
+                                <option value="@AircraftType.B767_300">B767_300</option>
+                                <option value="@AircraftType.B737_800">B737_800</option>
                             </select>
                             <select @bind="editFinger">
                                 <option value="1">Finger 1</option>
                                 <option value="2">Finger 2</option>
                                 <option value="3">Finger 3</option>
                             </select>
-
                             <button @onclick="(() => SaveEdit(f))">Save</button>
                             <button @onclick="CancelEdit">Cancel</button>
                             <span style="color:red">@editMsg</span>
@@ -95,6 +105,7 @@
                                 <strong>@f.Name</strong>
                                 <span style="opacity:.7; margin-left:8px">@f.TimeOfDay</span>
                                 <span style="opacity:.7; margin-left:8px">@ac</span>
+                                <span style="opacity:.7; margin-left:8px">Finger @f.Finger</span>
                             </div>
                             <div>
                                 <button @onclick="(() => BeginEdit(f))">Edit</button>
@@ -107,65 +118,86 @@
         }
     </div>
 }
-
-@if (tab == AdminTab.EscalationTimes)
+else if (tab == AdminTab.EscalationTimes)
 {
-    <div style="border:1px solid #ccc; border-radius:8px; padding:12px">
-        <h3>Escalation Times</h3>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px">
+        <h3 style="margin:0">Admin — Escalation Times</h3>
+        <button @onclick="BackToMenu">← Back</button>
+    </div>
 
-        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
-            <label>Aircraft</label>
-            <select value="@escAircraft" @onchange="OnEscAircraftChanged">
+    <div style="display:flex; gap:12px; align-items:end; margin-bottom:12px; flex-wrap:wrap">
+        <div>
+            <label>Aircraft</label><br />
+            <select @bind="escAircraft">
                 <option value="B737_800">B737_800</option>
                 <option value="B767_300">B767_300</option>
             </select>
-
-            @if (escLoading)
-            {
-                <span>Loading…</span>
-            }
         </div>
+        <button @onclick="LoadEscAsync">Load</button>
+        <button @onclick="SaveEscConfig">Save Config</button>
+        <button @onclick="AddEscMilestone">Add Milestone</button>
+        @if (escLoading)
+        {
+            <span style="opacity:.6">Loading…</span>
+        }
+    </div>
 
-        <div style="margin-top:12px">
-            <h4>Config</h4>
-            <div style="display:flex; gap:12px; flex-wrap:wrap">
-                <div>
-                    <label>LCO Offset (min)</label><br />
-                    <input type="number" @bind="escCfg.LastCanOffsetMinutes" />
-                </div>
-                <div>
-                    <label>Belly Close Offset (min)</label><br />
-                    <input type="number" @bind="escCfg.BellyCloseOffsetMinutes" />
-                </div>
-                <div style="align-self:end">
-                    <button @onclick="SaveEscConfig">Save Config</button>
-                </div>
+    <div style="border:1px solid #ccc; border-radius:8px; padding:12px; margin-bottom:12px">
+        <h4 style="margin:0 0 8px 0">Config</h4>
+        <div style="display:flex; gap:12px; flex-wrap:wrap">
+            <div>
+                <label>Last Can Offset (min)</label><br />
+                <input type="number" @bind="escCfg.LastCanOffsetMinutes" />
+            </div>
+            <div>
+                <label>Belly Close Offset (min) (optional)</label><br />
+                <input type="number" @bind="escCfg.BellyCloseOffsetMinutes" />
             </div>
         </div>
+    </div>
 
-        <div style="margin-top:16px">
-            <h4>Milestones</h4>
-            <button @onclick="AddEscMilestone">Add Milestone</button>
-
-            @if (escMilestones.Count == 0)
+    <div style="border:1px solid #ccc; border-radius:8px; padding:12px">
+        <h4 style="margin:0 0 8px 0">Milestones</h4>
+        @if (escMilestones.Count == 0)
+        {
+            <div style="opacity:.6">No milestones yet.</div>
+        }
+        else
+        {
+            @foreach (var m in escMilestones.OrderBy(x => x.SortOrder).ThenBy(x => x.OffsetMinutes))
             {
-                <div style="opacity:.6; margin-top:8px">No milestones</div>
-            }
-            @foreach (var m in escMilestones)
-            {
-                <div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap">
-                    <input @bind="m.Label" style="width:140px" />
-                    <input type="number" @bind="m.OffsetMinutes" style="width:120px" />
-                    <input type="number" @bind="m.SortOrder" style="width:90px" />
-                    <button @onclick="(() => SaveEscMilestone(m))">Save</button>
-                    <button @onclick="(() => DeleteEscMilestone(m.Id))">Delete</button>
+                <div style="display:grid; grid-template-columns: 1fr 140px 110px 140px; gap:8px; align-items:center; margin:6px 0;">
+                    <input value="@m.Label" @oninput="e => m.Label = e.Value?.ToString() ?? string.Empty" />
+                    <input type="number" value="@m.OffsetMinutes" @oninput="e => m.OffsetMinutes = ToInt(e.Value?.ToString())" />
+                    <input type="number" value="@m.SortOrder" @oninput="e => m.SortOrder = ToInt(e.Value?.ToString())" />
+                    <div>
+                        <button @onclick="(() => SaveEscMilestone(m))">Save</button>
+                        <button style="margin-left:6px" @onclick="(() => DeleteEscMilestone(m.Id))">Delete</button>
+                    </div>
                 </div>
             }
-        </div>
+        }
     </div>
 }
 
 @code {
+    // ---------- Tabs ----------
+    private enum AdminTab { None, FlightSchedule, EscalationTimes }
+    private AdminTab tab = AdminTab.None;
+
+    private void BackToMenu() => tab = AdminTab.None;
+    private async Task ShowFlightSchedule()
+    {
+        tab = AdminTab.FlightSchedule;
+        _adminFlights = (await Flights.GetAll()).ToList();
+    }
+    private async Task ShowEscalationTimes()
+    {
+        tab = AdminTab.EscalationTimes;
+        await LoadEscAsync();
+    }
+
+    // ---------- Flight Schedule ----------
     private List<Flight> _adminFlights = new();
 
     private string name = "";
@@ -178,24 +210,12 @@
     private string editName = "";
     private string editTime = "";
     private AircraftType editAircraft = AircraftType.B767_300;
-    private string editMsg = "";
     private int editFinger = 1;
-
-
-    private enum AdminTab { FlightSchedule, EscalationTimes }
-    private AdminTab tab = AdminTab.FlightSchedule;
-
-    // Escalation editor state
-    private string escAircraft = "B737_800";
-    private AircraftConfigRow escCfg = new AircraftConfigRow { Aircraft = "B737_800" };
-    private List<AircraftMilestoneRow> escMilestones = new List<AircraftMilestoneRow>();
-    private bool escLoading = false;
-
-    private static readonly string[] TimeFormats = { "HH:mm:ss", "H:mm:ss", "HH:mm", "H:mm" };
+    private string editMsg = "";
 
     protected override async Task OnInitializedAsync()
     {
-        _adminFlights = (await Flights.GetAll()).ToList();
+        // no data loaded until user picks a section
     }
 
     private async Task AddFlight()
@@ -206,9 +226,8 @@
             return;
         }
 
-        System.DateTime parsed;
-        var ok = System.DateTime.TryParseExact(timeText, TimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed);
-        if (!ok)
+        if (!DateTime.TryParseExact(timeText, new[] { "HH:mm", "HH:mm:ss" },
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
         {
             msg = "Invalid time. Use HH:mm or HH:mm:ss.";
             return;
@@ -217,7 +236,7 @@
         var f = new Flight
         {
             Name = name.Trim(),
-            TimeOfDay = parsed.ToString("HH:mm:ss"),
+            TimeOfDay = timeText.Trim(),
             Finger = finger,
             IsActive = true,
             Type = (AircraftType)aircraft
@@ -251,7 +270,7 @@
         editName = f.Name;
         editTime = f.TimeOfDay;
         editAircraft = f.Type;
-        editFinger = f.Finger;     // <— add this
+        editFinger = f.Finger;
         editMsg = "";
     }
 
@@ -268,8 +287,9 @@
             editMsg = "Name required.";
             return;
         }
+
         if (!DateTime.TryParseExact(editTime, new[] { "HH:mm", "HH:mm:ss" },
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
         {
             editMsg = "Invalid time. Use HH:mm or HH:mm:ss.";
             return;
@@ -280,46 +300,44 @@
             Id = original.Id,
             Name = editName.Trim(),
             TimeOfDay = editTime.Trim(),
-            Finger = editFinger,          // <— changed
+            Finger = editFinger,
             IsActive = original.IsActive,
             Type = editAircraft
         };
 
         await Flights.UpdateFlightAsync(updated);
+
         editingId = "";
         editMsg = "";
         _adminFlights = (await Flights.GetAll()).ToList();
     }
 
-
-    private void OnEditAircraftChanged(ChangeEventArgs e)
+    private int SortKey(string hhmm)
     {
-        var s = e.Value != null ? e.Value.ToString() : "";
-        int parsed;
-        if (int.TryParse(s, out parsed))
+        if (string.IsNullOrWhiteSpace(hhmm)) return 24 * 60 + 1;
+
+        if (DateTime.TryParseExact(
+                hhmm,
+                new[] { "HH:mm", "HH:mm:ss" },
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var dt))
         {
-            if (parsed == (int)AircraftType.B737_800) editAircraft = AircraftType.B737_800;
-            else editAircraft = AircraftType.B767_300;
+            return dt.Hour * 60 + dt.Minute;
         }
+
+        // Last-chance fallback
+        return DateTime.TryParse(hhmm, out var dt2) ? (dt2.Hour * 60 + dt2.Minute) : (24 * 60 + 1);
     }
 
-    private int SortKey(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return 24 * 60 + 1;
-        System.DateTime dt;
-        var ok = System.DateTime.TryParseExact(text, TimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
-        if (!ok) return 24 * 60 + 1;
-        return dt.Hour * 60 + dt.Minute;
-    }
 
-    // Escalation Times
-    private async Task OnEscAircraftChanged(ChangeEventArgs e)
-    {
-        var s = e.Value != null ? e.Value.ToString() : "B737_800";
-        escAircraft = s;
-        await LoadEscAsync();
-    }
+    // ---------- Escalation Times ----------
+    private string escAircraft = "B737_800";
+    private AircraftConfigRow escCfg = new AircraftConfigRow { Aircraft = "B737_800" };
+    private List<AircraftMilestoneRow> escMilestones = new();
+    private bool escLoading = false;
 
+    private int ToInt(string? s) => int.TryParse(s, out var v) ? v : 0;
 
     private async Task LoadEscAsync()
     {
@@ -339,12 +357,14 @@
 
     private async Task AddEscMilestone()
     {
-        var m = new AircraftMilestoneRow();
-        m.Id = Guid.Empty;
-        m.Aircraft = escAircraft;
-        m.Label = "New Milestone";
-        m.OffsetMinutes = -90;
-        m.SortOrder = escMilestones.Count;
+        var m = new AircraftMilestoneRow
+        {
+            Id = Guid.Empty,
+            Aircraft = escAircraft,
+            Label = "New Milestone",
+            OffsetMinutes = -90,
+            SortOrder = escMilestones.Count
+        };
         await Flights.UpsertMilestoneAsync(m);
         await LoadEscAsync();
     }
