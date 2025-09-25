@@ -2242,10 +2242,10 @@ C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\D
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\appsettings.json
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\appsettings.json.gz
 C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\vqzg6kyqc4-uualcilvjk.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.k0q3gebii7.wasm
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.enhjmngn2i.pdb
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.k0q3gebii7.wasm.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.enhjmngn2i.pdb.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\4xtot7mzrk-k0q3gebii7.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\rfk9n9agx8-enhjmngn2i.gz
-C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\7dfri0g7eh-i2nzfrazeo.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.me8wdu8y1b.wasm
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.utu7hcv9zi.pdb
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.me8wdu8y1b.wasm.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\bin\Debug\net9.0\wwwroot\_framework\EscalationMatrixCountdown.utu7hcv9zi.pdb.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\4xtot7mzrk-me8wdu8y1b.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\rfk9n9agx8-utu7hcv9zi.gz
+C:\Users\moise\Documents\git-repos\RiderProjects\EscalationMatrixCountdown\obj\Debug\net9.0\compressed\7dfri0g7eh-3wt4ugl0ir.gz

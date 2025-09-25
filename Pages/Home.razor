@@ -154,6 +154,8 @@ else
 
     private System.DateTime departureLocal;
     private bool hasDeparture;
+    private static readonly string[] TimeFormats = { "HH:mm:ss", "H:mm:ss", "HH:mm", "H:mm" };
+
 
     private System.DateTime nowLocal = System.DateTime.Now;
     private string nextLabel = "";
@@ -166,6 +168,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         _allFlights = (await Flights.GetAll()).ToList();
+        
 
         t.Elapsed += (_, __) => InvokeAsync(Tick);
         t.AutoReset = true;
@@ -248,7 +251,7 @@ private void Tick()
         var manualFlight = flights.FirstOrDefault(f => f.Id == selectedGuid);
         if (manualFlight != null)
         {
-            if (System.DateTime.TryParseExact(manualFlight.TimeOfDay, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var todParsed))
+            if (System.DateTime.TryParseExact(manualFlight.TimeOfDay, TimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var todParsed))
             {
                 var occToday = new System.DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, todParsed.Hour, todParsed.Minute, 0);
 
@@ -286,7 +289,7 @@ private void Tick()
             var f = flights[i];
             if (string.IsNullOrWhiteSpace(f.TimeOfDay)) continue;
 
-            if (!System.DateTime.TryParseExact(f.TimeOfDay, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var todParsed)) continue;
+            if (!System.DateTime.TryParseExact(f.TimeOfDay, TimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var todParsed)) continue;
 
             var occToday = new System.DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, todParsed.Hour, todParsed.Minute, 0);
 
