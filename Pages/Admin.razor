@@ -76,6 +76,12 @@
                                 <option value="@((int)AircraftType.B767_300)">B767_300</option>
                                 <option value="@((int)AircraftType.B737_800)">B737_800</option>
                             </select>
+                            <select @bind="editFinger">
+                                <option value="1">Finger 1</option>
+                                <option value="2">Finger 2</option>
+                                <option value="3">Finger 3</option>
+                            </select>
+
                             <button @onclick="(() => SaveEdit(f))">Save</button>
                             <button @onclick="CancelEdit">Cancel</button>
                             <span style="color:red">@editMsg</span>
@@ -173,6 +179,8 @@
     private string editTime = "";
     private AircraftType editAircraft = AircraftType.B767_300;
     private string editMsg = "";
+    private int editFinger = 1;
+
 
     private enum AdminTab { FlightSchedule, EscalationTimes }
     private AdminTab tab = AdminTab.FlightSchedule;
@@ -243,6 +251,7 @@
         editName = f.Name;
         editTime = f.TimeOfDay;
         editAircraft = f.Type;
+        editFinger = f.Finger;     // <— add this
         editMsg = "";
     }
 
@@ -259,10 +268,8 @@
             editMsg = "Name required.";
             return;
         }
-
-        System.DateTime parsed;
-        var ok = System.DateTime.TryParseExact(editTime, TimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed);
-        if (!ok)
+        if (!DateTime.TryParseExact(editTime, new[] { "HH:mm", "HH:mm:ss" },
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
         {
             editMsg = "Invalid time. Use HH:mm or HH:mm:ss.";
             return;
@@ -272,19 +279,18 @@
         {
             Id = original.Id,
             Name = editName.Trim(),
-            TimeOfDay = parsed.ToString("HH:mm:ss"),
-            Finger = original.Finger,
+            TimeOfDay = editTime.Trim(),
+            Finger = editFinger,          // <— changed
             IsActive = original.IsActive,
             Type = editAircraft
         };
 
         await Flights.UpdateFlightAsync(updated);
-
         editingId = "";
         editMsg = "";
-
         _adminFlights = (await Flights.GetAll()).ToList();
     }
+
 
     private void OnEditAircraftChanged(ChangeEventArgs e)
     {
