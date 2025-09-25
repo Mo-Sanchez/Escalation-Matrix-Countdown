@@ -1,42 +1,81 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Linq;
 using EscalationMatrixCountdown.Models;
+using Postgrest;               // for Constants and Order
+using Supabase;
 
 namespace EscalationMatrixCountdown.Services
 {
     public class FlightsService
     {
-        private readonly List<Flight> _flights = new List<Flight>();
+        private readonly Supabase.Client _supabase;
 
-        public FlightsService()
+        public FlightsService(Supabase.Client supabase)
         {
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "IAH", TimeOfDay = "23:38", Finger = 3, IsActive = true, Type = AircraftType.B767_300 });
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "PIT", TimeOfDay = "23:30", Finger = 1, IsActive = true, Type = AircraftType.B737_800 });
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "CVG", TimeOfDay = "07:21", Finger = 1, IsActive = true, Type = AircraftType.B737_800 });
+            _supabase = supabase;
         }
 
-        public IReadOnlyList<Flight> GetAll() { return _flights; }
-
-        public void Add(Flight f)
+        public async Task<IReadOnlyList<Flight>> GetAll()
         {
-            if (f == null) return;
-            if (string.IsNullOrWhiteSpace(f.Id)) return;
-            _flights.Add(f);
+            var r = await _supabase.From<Flight>()
+                .Select("*")
+                .Get();
+            return r.Models;
         }
 
-        public void Remove(string id)
+        public async Task AddFlightAsync(Flight flight)
         {
-            if (string.IsNullOrWhiteSpace(id)) return;
-            var found = _flights.FirstOrDefault(x => x.Id == id);
-            if (found != null) _flights.Remove(found);
+            await _supabase.From<Flight>().Insert(flight);
         }
 
-        public void Update(Flight f)
+        public async Task UpdateFlightAsync(Flight flight)
         {
-            if (f == null) return;
-            if (string.IsNullOrWhiteSpace(f.Id)) return;
-            var i = _flights.FindIndex(x => x.Id == f.Id);
-            if (i >= 0) _flights[i] = f;
+            await _supabase.From<Flight>().Update(flight);
+        }
+
+        public async Task DeleteFlightAsync(System.Guid id)
+        {
+            await _supabase.From<Flight>()
+                .Filter("id", Postgrest.Constants.Operator.Equals, id.ToString())
+                .Delete();
+        }
+
+        // Escalation config
+        public async Task<AircraftConfigRow> GetAircraftConfigAsync(string aircraft)
+        {
+            var r = await _supabase.From<AircraftConfigRow>()
+                .Filter("aircraft", Postgrest.Constants.Operator.Equals, aircraft)
+                .Single();
+            return r ?? new AircraftConfigRow { Aircraft = aircraft };
+        }
+
+
+        public async Task<IReadOnlyList<AircraftMilestoneRow>> GetMilestonesAsync(string aircraft)
+        {
+            var r = await _supabase.From<AircraftMilestoneRow>()
+                .Filter("aircraft", Postgrest.Constants.Operator.Equals, aircraft)
+                .Order("sort_order", Postgrest.Constants.Ordering.Ascending)
+                .Get();
+            return r.Models;
+        }
+
+        public async Task SaveAircraftConfigAsync(AircraftConfigRow row)
+        {
+            await _supabase.From<AircraftConfigRow>().Upsert(row);
+        }
+
+        public async Task UpsertMilestoneAsync(AircraftMilestoneRow row)
+        {
+            if (row.Id == System.Guid.Empty) row.Id = System.Guid.NewGuid();
+            await _supabase.From<AircraftMilestoneRow>().Upsert(row);
+        }
+
+        public async Task DeleteMilestoneAsync(System.Guid id)
+        {
+            await _supabase.From<AircraftMilestoneRow>()
+                .Filter("id", Postgrest.Constants.Operator.Equals, id.ToString())
+                .Delete();
         }
     }
 }

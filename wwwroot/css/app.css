@@ -1,88 +1,168 @@
+/* app.css */
+
 /* ------------------- */
-/* Blazor loading: text only, no circle */
+/* Variables & General */
 /* ------------------- */
-.loading-progress {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background-color: white;
-    z-index: 1000;
+:root {
+    --page-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: #e5e7eb;
+    --text-color: #334155;
+    --text-muted-color: #64748b;
+    --accent-color-blue: #3b82f6;
+    --accent-color-red: #d92d20;
 }
-.loading-progress svg,
-.loading-progress circle {
-    display: none !important;
-}
-.loading-progress-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 3rem;
-    font-weight: bold;
-    color: black;
-}
-.loading-progress-text:after {
-    content: var(--blazor-load-percentage-text, "Loading");
+
+body {
+    background-color: var(--page-bg);
+    color: var(--text-color);
 }
 
 /* ------------------- */
-/* Default bits kept */
+/* Blazor loading (unchanged) */
 /* ------------------- */
-code { color: #8B0000; } /*//#8B0000 //#c02d76; */
-.form-floating > .form-control-plaintext { color: var(--bs-secondary-color); text-align: end; }
-.form-floating > .form-control-plaintext:focus { text-align: start; }
+.loading-progress { display: block; position: fixed; inset: 0; background-color: white; z-index: 1000; }
+.loading-progress svg, .loading-progress circle { display: none !important; }
+.loading-progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: bold; color: black; }
+.loading-progress-text:after { content: var(--blazor-load-percentage-text, "Loading"); }
 
 /* ------------------- */
-/* TV MODE STYLES */
+/* TV MODE STYLES (New Design) */
 /* ------------------- */
-.tv-wrap { padding: 24px; font-size: 28px; line-height: 1.25; }
+.tv-wrap {
+    padding: 24px;
+    font-size: 24px;
+    line-height: 1.4;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
 
 /* Header */
-.tv-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-.title { font-size:56px; font-weight:800; margin:0; }
-.badges { display:flex; gap:12px; align-items:center; }
-.badge { padding:6px 12px; border-radius:999px; font-size:24px; font-weight:700; background:#eef1f5; }
-.badge.green { background:#e7f6ec; }
-.badge.blue  { background:#e7f0ff; }
-.badge.gold  { background:#fff6e6; }
+.tv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+.title {
+    font-size: 48px;
+    font-weight: 800;
+    margin: 0;
+}
+.badges { display: flex; gap: 12px; align-items: center; }
+.badge { padding: 8px 16px; border-radius: 999px; font-size: 20px; font-weight: 600; background: #eef1f5; display: flex; align-items: center; gap: 8px; }
+.badge .bi { font-size: 1.2em; }
+.badge.green { background: #e7f6ec; color: #05603a; }
+.badge.blue { background: #e7f0ff; color: #004dc7; }
+.badge.gold { background: #fff6e6; color: #855c00; }
 
 /* Controls row */
-.controls { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
-.controls button { font-size:24px; padding:8px 14px; }
+.controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 24px;
+    background-color: var(--card-bg);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
+}
+.control-group { display: flex; align-items: center; gap: 8px; }
+.control-group label { font-weight: 600; color: var(--text-muted-color); font-size: 20px; }
+.btn-group button { font-size: 20px; padding: 6px 14px; border-radius: 8px !important; }
+.flight-selector { font-size: 20px; padding: 6px 12px; border-radius: 8px; border: 1px solid #ccc; }
+.controls .btn-kiosk { margin-left: auto; font-size: 20px; padding: 6px 14px; }
 
 /* Main grid */
-.tv-grid { display:grid; grid-template-columns: 2fr 1fr; gap:24px; }
+.tv-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+/* Card base style */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
+}
 
 /* Countdown card */
-.card { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; padding:16px; }
-.countdown-big { font-size:96px; font-weight:900; text-align:center; margin:12px 0 0 0; }
-.subtle { opacity:.7; font-size:24px; text-align:center; margin-top:4px; }
+.countdown-big {
+    font-size: 84px;
+    font-weight: 900;
+    text-align: center;
+    margin: 4px 0 0 0;
+    line-height: 1.1;
+}
+.subtle {
+    opacity: .8;
+    font-size: 22px;
+    text-align: center;
+    margin: 0;
+    font-weight: 600;
+}
 
 /* Milestones table */
-.table-wrap { overflow:hidden; border-radius:16px; border:1px solid #e5e7eb; }
-.table { width:100%; border-collapse:separate; border-spacing:0; }
-.table thead th { text-align:left; background:#f8fafc; font-size:24px; padding:12px 16px; border-bottom:1px solid #e5e7eb; }
-.table tbody td { padding:14px 16px; font-size:28px; border-bottom:1px solid #f1f5f9; }
-.table tbody tr:last-child td { border-bottom:none; }
+.table-wrap {
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
+}
+.table { width: 100%; border-collapse: collapse; }
+.table thead th {
+    text-align: left;
+    background: #f8fafc;
+    font-size: 20px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-muted-color);
+    font-weight: 600;
+}
+.table tbody td {
+    padding: 16px 20px;
+    font-size: 24px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:nth-child(even) { background-color: #f8fafc; }
 
-/* Details list */
-.kv { display:grid; grid-template-columns: auto 1fr; gap:8px 16px; font-size:28px; }
-.kv .k { color:#64748b; }
-.kv .v { font-weight:700; }
+/* Details list (Key-Value) */
+.kv { display: flex; flex-direction: column; gap: 16px; font-size: 22px; }
+.kv-item { display: flex; align-items: center; gap: 12px; }
+.kv-item .bi { font-size: 1.2em; color: var(--text-muted-color); }
+.kv-item .k { color: var(--text-muted-color); }
+.kv-item .v { font-weight: 700; margin-left: auto; }
 
-/* Due soon */
-.red { color:#d92d20; }
+
+/* Due soon highlight */
+.red { color: var(--accent-color-red); font-weight: 700; }
 
 /* ------------------- */
-/* KIOSK MODE (unchanged sizes) */
+/* KIOSK MODE */
 /* ------------------- */
-.kiosk { font-size: 48px; }
-.kiosk .big { font-size: 244px; font-weight: 900; }
-.kiosk .mid { font-size: 168px; font-weight: 700; }
-.kiosk .small { font-size: 92px; }
-.kiosk .extraSmall { font-size: 68px; }
+.kiosk-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100vh;
+    padding: 24px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+.kiosk .big { font-size: 260px; font-weight: 900; line-height: 1; margin: 12px 0; padding: 16px 0;}
+.kiosk .mid { font-size: 140px; font-weight: 700; line-height: 1; padding: 16px 0; }
+.kiosk .small { font-size: 120px; line-height: 1.1; padding: 16px 0;}
+.kiosk .extraSmall { font-size: 70px; padding: 16px 0;}
 .kiosk .muted { opacity: 0.7; }
-
+.kiosk .kiosk-controls { margin-top: 80px; display: flex; gap: 16px; }
+.kiosk .kiosk-controls button { font-size: 32px; padding: 12px 24px; Color: #4c4c4c
+}
 
 
 /* hide nav when body has .kiosk */
@@ -92,16 +172,145 @@ body.kiosk .navmenu,
 body.kiosk nav[role="navigation"],
 body.kiosk aside { display: none !important; }
 
-body.kiosk .main,           /* default template */
-body.kiosk .content,        /* some templates use .content */
-body.kiosk .page,           /* fallback */
-body.kiosk .container { margin:0 !important; padding-left:0 !important; }
+body.kiosk .main,
+body.kiosk .content,
+body.kiosk .page,
+body.kiosk .container { margin:0 !important; padding:0 !important; height:100%; }
+
+/* Default Blazor template classes you might still use */
+code { color: #8B0000; }
+.btn { border-radius: 8px; }
 
 
+/* Menu item: slightly bigger text, icon a bit larger and nudged up */
+.nav-scrollable .nav-link{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    font-size:1.075rem;              /* text slightly bigger */
+    padding-top:.15rem;
+    padding-bottom:.15rem;
+}
+
+.nav-scrollable .nav-link .bi{
+    font-size:1.2em;                 /* icon slightly bigger */
+    position:relative;
+    top:-1px;                        /* move icon up a little */
+    line-height:1;
+}
+
+/* Add these new styles to your existing app.css file */
+
 /* ------------------- */
-/* Legacy page classes kept */
+/* TV MODE STYLES (New additions for All Fingers view) */
 /* ------------------- */
-.page-wrap { font-size: 28px; line-height: 1.25; }
-.metrics p { margin: 0; font-size: 36px; }
-.countdown { font-size: 80px; font-weight: 800; }
-.table-big th, .table-big td { padding: 10px 16px; font-size: 28px; }
+
+.form-check-input {
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+}
+.form-check-label {
+    padding-left: .5em;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.all-fingers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.finger-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.finger-title {
+    font-size: 32px;
+    font-weight: 700;
+    padding-left: 8px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.flight-card {
+    padding: 16px;
+}
+.flight-card-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--text-muted-color);
+    background-color: #f8fafc;
+}
+
+.flight-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 22px;
+}
+.flight-name {
+    font-weight: 700;
+}
+.aircraft-type {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-muted-color);
+}
+.flight-card-body {
+    text-align: center;
+    margin: 16px 0;
+}
+.flight-countdown {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+}
+.flight-subtle {
+    font-size: 18px;
+    color: var(--text-muted-color);
+    margin-top: 4px;
+}
+.flight-card-footer {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-muted-color);
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+/* Add this new class to your existing app.css file */
+
+/* REMOVE the old .red and .next-milestone classes and REPLACE with these */
+
+/* Style for passed or imminent milestones (red text) */
+.table tbody tr.is-alert td {
+    color: var(--accent-color-red);
+}
+
+/* Subtle next-milestone highlight */
+.table tbody tr.is-next-milestone > td {
+    background-color: rgba(255, 253, 166, 0.89) !important; /* soft blue */
+    color: #000000 !important;            /* deep blue text */
+    font-weight: 700;
+    border-bottom: 2px solid rgba(255, 251, 108, 0.89);     /* light blue border */
+}
+
+/* ≤10 min warning (keep strong but not screaming) */
+.table tbody tr.red > td {
+    background: #fde2e2 !important; /* soft red */
+    color: #9b1c1c !important;
+    font-weight: 700;
+}
+
+:focus {
+    outline: none;
+    box-shadow: none;
+}
