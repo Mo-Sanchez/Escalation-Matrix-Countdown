@@ -11,7 +11,7 @@ namespace EscalationMatrixCountdown.Services
             {
                 return new AircraftConfig
                 {
-                    Name = "B737-800",
+                    Name = "B737_800",
                     StringOffsetsMinutes = new Milestone[]
                     {
                         new Milestone { Label = "Forward Belly", OffsetMinutes = -135 },
@@ -25,10 +25,10 @@ namespace EscalationMatrixCountdown.Services
                     BellyCloseOffsetMinutes = null 
                 };
             }
-            // default 767-300
+            // default 767_300
             return new AircraftConfig
             {
-                Name = "B767-300",
+                Name = "B767_300",
                 StringOffsetsMinutes = new Milestone[]
                 {
                     new Milestone {Label = "FWD Lower Deck", OffsetMinutes = -110},

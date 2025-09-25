@@ -35,7 +35,7 @@
         <span style="margin-left:12px">View Flight:</span>
         <select @onchange="SelectFlight" class="flight-selector">
             <option value="">Automatic (Default)</option>
-            @foreach (var flight in Flights.GetAll().Where(x => x.IsActive && x.Finger == selectedFinger))
+            @foreach (var flight in _allFlights.Where(x => x.IsActive && x.Finger == selectedFinger))
             {
                 <option value="@flight.Id">@flight.Name - @flight.TimeOfDay</option>
             }
@@ -142,9 +142,12 @@ else
     //Building admin page
     //UI Polish & Alerts
     //Integrade the supabase database https://supabase.com/dashboard/project/wmygobbzqaxyopukzxkd*/
+    //Fingers have their own URL
     private string activeFlightName = "";
     private int selectedFinger = 1;
     private bool kiosk = false;
+    
+    private List<Flight> _allFlights = new();
 
     private AircraftType activeType = AircraftType.B767_300;
     private AircraftConfig cfg;
@@ -160,8 +163,10 @@ else
 
     private System.Timers.Timer t = new System.Timers.Timer(1000);
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        _allFlights = (await Flights.GetAll()).ToList();
+
         t.Elapsed += (_, __) => InvokeAsync(Tick);
         t.AutoReset = true;
         t.Enabled = true;
@@ -215,8 +220,8 @@ else
 
     private string ActiveTypeName()
     {
-        if (activeType == AircraftType.B737_800) return "B737-800";
-        return "B767-300";
+        if (activeType == AircraftType.B737_800) return "B737_800";
+        return "B767_300";
     }
 
     private string LabelForIndex(int i)
@@ -233,14 +238,14 @@ else
 private void Tick()
 {
     nowLocal = System.DateTime.Now;
-    var flights = Flights.GetAll().Where(x => x.IsActive && x.Finger == selectedFinger).ToList();
+    var flights = _allFlights.Where(x => x.IsActive && x.Finger == selectedFinger).ToList();
 
     // --- Flight Selection Logic ---
 
     // Manual override logic (if a flight is selected in the dropdown)
-    if (!string.IsNullOrEmpty(manuallySelectedFlightID))
+    if (!string.IsNullOrEmpty(manuallySelectedFlightID) && Guid.TryParse(manuallySelectedFlightID, out var selectedGuid))
     {
-        var manualFlight = flights.FirstOrDefault(f => f.Id == manuallySelectedFlightID);
+        var manualFlight = flights.FirstOrDefault(f => f.Id == selectedGuid);
         if (manualFlight != null)
         {
             if (System.DateTime.TryParseExact(manualFlight.TimeOfDay, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var todParsed))

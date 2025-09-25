@@ -1,42 +1,41 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using EscalationMatrixCountdown.Models;
+using Supabase;
+using System;
 
 namespace EscalationMatrixCountdown.Services
 {
     public class FlightsService
     {
-        private readonly List<Flight> _flights = new List<Flight>();
+        private readonly Client _supabase;
 
-        public FlightsService()
+        public FlightsService(Client supabase)
         {
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "IAH", TimeOfDay = "23:38", Finger = 3, IsActive = true, Type = AircraftType.B767_300 });
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "PIT", TimeOfDay = "23:30", Finger = 1, IsActive = true, Type = AircraftType.B737_800 });
-            _flights.Add(new Flight { Id = System.Guid.NewGuid().ToString(), Name = "CVG", TimeOfDay = "07:21", Finger = 1, IsActive = true, Type = AircraftType.B737_800 });
+            _supabase = supabase;
         }
 
-        public IReadOnlyList<Flight> GetAll() { return _flights; }
-
-        public void Add(Flight f)
+        public async Task<IReadOnlyList<Flight>> GetAll()
         {
-            if (f == null) return;
-            if (string.IsNullOrWhiteSpace(f.Id)) return;
-            _flights.Add(f);
+            var r = await _supabase.From<Flight>()
+                .Select("*")
+                .Get();
+            return r.Models;
         }
 
-        public void Remove(string id)
+        public async Task AddFlightAsync(Flight flight)
         {
-            if (string.IsNullOrWhiteSpace(id)) return;
-            var found = _flights.FirstOrDefault(x => x.Id == id);
-            if (found != null) _flights.Remove(found);
+            await _supabase.From<Flight>().Insert(flight);
         }
 
-        public void Update(Flight f)
+        public async Task UpdateFlightAsync(Flight flight)
         {
-            if (f == null) return;
-            if (string.IsNullOrWhiteSpace(f.Id)) return;
-            var i = _flights.FindIndex(x => x.Id == f.Id);
-            if (i >= 0) _flights[i] = f;
+            await _supabase.From<Flight>().Update(flight);
+        }
+
+        public async Task DeleteFlightAsync(Guid id)
+        {
+            await _supabase.From<Flight>().Where(f => f.Id == id).Delete();
         }
     }
 }
