@@ -27,10 +27,10 @@
         <div class="control-group">
             <label>Finger:</label>
             <div class="btn-group">
-                <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/Finger1")'>1</button>
-                <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/Finger2")'>2</button>
-                <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/Finger3")'>3</button>
-                <button class="btn @(selectedFinger == "All" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("/")'>All</button>
+                <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("Finger1")'>1</button>
+                <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("Finger2")'>2</button>
+                <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("Finger3")'>3</button>
+                <button class="btn @(selectedFinger == "All" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => Navigation.NavigateTo("")'>All</button>
             </div>
         </div>
         <div class="control-group">
@@ -162,9 +162,9 @@ else
         }
         <div class="kiosk-controls">
             <button class="btn btn-secondary" @onclick="ExitKiosk">Exit Kiosk</button>
-            <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("/Finger1")'>1</button>
-            <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("/Finger2")'>2</button>
-            <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("/Finger3")'>3</button>
+            <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("Finger1")'>1</button>
+            <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("Finger2")'>2</button>
+            <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-light")" @onclick='() => Navigation.NavigateTo("Finger3")'>3</button>
         </div>
     </div>
 }
