@@ -4,7 +4,8 @@
 @implements IDisposable
 @inject EscalationMatrixCountdown.Services.FlightsService Flights
 @inject IJSRuntime JS
-
+@using EscalationMatrixCountdown.Services
+@inject IAircraftConfigService ConfigService
 
 
 
@@ -15,7 +16,7 @@
     <div class="tv-header">
         <h1 class="title">ULD Countdown</h1>
         <div class="badges">
-            <div class="badge blue">Finger @selectedFinger</div>
+            <div class="badge blue">Finger @selectedFinger</div>F
             <div class="badge green">@ActiveTypeName()</div>
             @if (!string.IsNullOrEmpty(activeFlightName))
             {
@@ -30,10 +31,20 @@
         <button @onclick="() => SetFinger(1)">1</button>
         <button @onclick="() => SetFinger(2)">2</button>
         <button @onclick="() => SetFinger(3)">3</button>
+
+        <span style="margin-left:12px">View Flight:</span>
+        <select @onchange="SelectFlight" class="flight-selector">
+            <option value="">Automatic (Default)</option>
+            @foreach (var flight in Flights.GetAll().Where(x => x.IsActive && x.Finger == selectedFinger))
+            {
+                <option value="@flight.Id">@flight.Name - @flight.TimeOfDay</option>
+            }
+        </select>
+
         <button style="margin-left:12px" @onclick="EnterKiosk">Enter Kiosk</button>
     </div>
 
-    @if (hasDeparture)
+    @if (hasDeparture && cfg != null)
     {
         <div class="tv-grid">
             <!-- Left: Milestones table -->
@@ -43,15 +54,31 @@
                         <tr><th>Milestone</th><th>Due</th><th>Remaining</th></tr>
                     </thead>
                     <tbody>
+
+                    @if (cfg.BellyCloseOffsetMinutes.HasValue)
+                    {
+                        var bellyDue = DueTime(cfg.BellyCloseOffsetMinutes.Value);
+                        var bellyRem = bellyDue - nowLocal;
+                        var bellyClass = "";
+                        if (bellyRem.TotalSeconds >= 0 && bellyRem.TotalMinutes <= 10) bellyClass = "red";
+                        <tr class="@bellyClass">
+                            <td>Belly Cans</td>
+                            <td>@bellyDue.ToString("HH:mm")</td>
+                            <td>@FormatSpan(bellyRem)</td>
+                        </tr>
+                    }
+
                     @for (var i = 0; i < cfg.StringOffsetsMinutes.Length; i++)
                     {
-                        var label = LabelForIndex(i);
-                        var due = DueTime(cfg.StringOffsetsMinutes[i]);
+                        // Get the milestone object for this position in the loop
+                        var milestone = cfg.StringOffsetsMinutes[i];
+
+                        var due = DueTime(milestone.OffsetMinutes);
                         var rem = due - nowLocal;
                         var rowClass = "";
                         if (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) rowClass = "red";
                         <tr class="@rowClass">
-                            <td>@label</td>
+                            <td>@milestone.Label</td>
                             <td>@due.ToString("HH:mm")</td>
                             <td>@FormatSpan(rem)</td>
                         </tr>
@@ -69,18 +96,7 @@
                         <td>@FormatSpan(lcoRem)</td>
                     </tr>
 
-                    @if (cfg.BellyCloseOffsetMinutes.HasValue)
-                    {
-                        var bellyDue = DueTime(cfg.BellyCloseOffsetMinutes.Value);
-                        var bellyRem = bellyDue - nowLocal;
-                        var bellyClass = "";
-                        if (bellyRem.TotalSeconds >= 0 && bellyRem.TotalMinutes <= 10) bellyClass = "red";
-                        <tr class="@bellyClass">
-                            <td>Belly Cans</td>
-                            <td>@bellyDue.ToString("HH:mm")</td>
-                            <td>@FormatSpan(bellyRem)</td>
-                        </tr>
-                    }
+
                     </tbody>
                 </table>
             </div>
@@ -121,15 +137,17 @@ else
 }
 
 @code {
-    
-    /*#ToDo: Add next button in home and kiosk page to skip flight
-    #Integrade the supabase database https://supabase.com/dashboard/project/wmygobbzqaxyopukzxkd*/
+    private string? manuallySelectedFlightID = null;
+    //Todo: Set up Supabase table
+    //Building admin page
+    //UI Polish & Alerts
+    //Integrade the supabase database https://supabase.com/dashboard/project/wmygobbzqaxyopukzxkd*/
     private string activeFlightName = "";
     private int selectedFinger = 1;
     private bool kiosk = false;
 
     private AircraftType activeType = AircraftType.B767_300;
-    private AircraftConfig cfg = AircraftConfig.Get(AircraftType.B767_300);
+    private AircraftConfig cfg;
 
     private System.DateTime departureLocal;
     private bool hasDeparture;
@@ -155,6 +173,19 @@ else
         JS.InvokeVoidAsync("kiosk.enter");
     }
 
+    private void SelectFlight(ChangeEventArgs e)
+    {
+        var selectedId = e.Value?.ToString();
+
+        if (string.IsNullOrEmpty(selectedId))
+        {
+            manuallySelectedFlightID = null; // This is our "Restore" option
+        }
+        else
+        {
+            manuallySelectedFlightID = selectedId;
+        }
+    }
     private void ExitKiosk()
     {
         kiosk = false;
@@ -166,6 +197,7 @@ else
         selectedFinger = f;
         hasDeparture = false;
         activeFlightName = "";
+        manuallySelectedFlightID = null; // Add this line
     }
 
     private System.DateTime DueTime(int offsetMin)
@@ -196,12 +228,46 @@ else
         return n + "th String";
     }
 
-    private void Tick()
+
+    
+private void Tick()
+{
+    nowLocal = System.DateTime.Now;
+    var flights = Flights.GetAll().Where(x => x.IsActive && x.Finger == selectedFinger).ToList();
+
+    // --- Flight Selection Logic ---
+
+    // Manual override logic (if a flight is selected in the dropdown)
+    if (!string.IsNullOrEmpty(manuallySelectedFlightID))
     {
-        nowLocal = System.DateTime.Now;
+        var manualFlight = flights.FirstOrDefault(f => f.Id == manuallySelectedFlightID);
+        if (manualFlight != null)
+        {
+            if (System.DateTime.TryParseExact(manualFlight.TimeOfDay, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var todParsed))
+            {
+                var occToday = new System.DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, todParsed.Hour, todParsed.Minute, 0);
 
-        var flights = Flights.GetAll().Where(x => x.IsActive && x.Finger == selectedFinger).ToList();
+                // If the calculated departure time for today is already in the past, advance it to the next day.
+                if (occToday < nowLocal)
+                {
+                    occToday = occToday.AddDays(1);
+                }
 
+                departureLocal = occToday;
+                hasDeparture = true;
+                activeFlightName = manualFlight.Name;
+                activeType = manualFlight.Type;
+                cfg = ConfigService.GetConfig(activeType);
+            }
+        }
+        else
+        {
+            manuallySelectedFlightID = null; // Flight not found, revert to auto
+        }
+    }
+    // Automatic selection logic (if dropdown is on "Automatic (Default)")
+    else
+    {
         System.DateTime? currentOcc = null;
         string currentName = "";
         AircraftType currentType = AircraftType.B767_300;
@@ -215,19 +281,14 @@ else
             var f = flights[i];
             if (string.IsNullOrWhiteSpace(f.TimeOfDay)) continue;
 
-            System.DateTime todParsed;
-            var ok = System.DateTime.TryParseExact(
-                f.TimeOfDay,
-                "HH:mm",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out todParsed);
-            if (!ok) continue;
+            if (!System.DateTime.TryParseExact(f.TimeOfDay, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var todParsed)) continue;
 
             var occToday = new System.DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, todParsed.Hour, todParsed.Minute, 0);
 
-            var config = AircraftConfig.Get(f.Type);
-            var startWindow = occToday.AddMinutes(config.StringOffsetsMinutes[0]);
+            var config = ConfigService.GetConfig(f.Type);
+            if (config.StringOffsetsMinutes.Length == 0) continue; // Defensive check
+
+            var startWindow = occToday.AddMinutes(config.StringOffsetsMinutes[0].OffsetMinutes);
             var lco = occToday.AddMinutes(config.LastCanOffsetMinutes);
             var graceEnd = lco.AddMinutes(5);
 
@@ -243,7 +304,8 @@ else
             else
             {
                 System.DateTime candidate;
-                if (nowLocal < startWindow) candidate = occToday; else candidate = occToday.AddDays(1);
+                if (nowLocal < startWindow) candidate = occToday;
+                else candidate = occToday.AddDays(1);
 
                 if (!nextOcc.HasValue || candidate < nextOcc.Value)
                 {
@@ -260,7 +322,7 @@ else
             hasDeparture = true;
             activeFlightName = currentName;
             activeType = currentType;
-            cfg = AircraftConfig.Get(activeType);
+            cfg = ConfigService.GetConfig(activeType);
         }
         else if (nextOcc.HasValue)
         {
@@ -268,64 +330,70 @@ else
             hasDeparture = true;
             activeFlightName = nextName;
             activeType = nextType;
-            cfg = AircraftConfig.Get(activeType);
+            cfg = ConfigService.GetConfig(activeType);
         }
         else
         {
             hasDeparture = false;
-            activeFlightName = "";
-            StateHasChanged();
-            return;
         }
-
-        var bestLabel = "";
-        var bestDue = System.DateTime.MaxValue;
-
-        for (var i = 0; i < cfg.StringOffsetsMinutes.Length; i++)
-        {
-            var label = LabelForIndex(i);
-            var due = DueTime(cfg.StringOffsetsMinutes[i]);
-            if (due >= nowLocal && due < bestDue)
-            {
-                bestDue = due;
-                bestLabel = label;
-            }
-        }
-
-        var lcoDue = DueTime(cfg.LastCanOffsetMinutes);
-        if (lcoDue >= nowLocal && lcoDue < bestDue)
-        {
-            bestDue = lcoDue;
-            bestLabel = "Last Can (LCO)";
-        }
-
-        if (cfg.BellyCloseOffsetMinutes.HasValue)
-        {
-            var bellyDue = DueTime(cfg.BellyCloseOffsetMinutes.Value);
-            if (bellyDue >= nowLocal && bellyDue < bestDue)
-            {
-                bestDue = bellyDue;
-                bestLabel = "Belly Cans";
-            }
-        }
-
-        nextLabel = bestLabel;
-        nextDueLocal = bestDue;
-
-        if (bestLabel == "")
-        {
-            remainingText = "00:00:00";
-            currentColor = "inherit";
-        }
-        else
-        {
-            var rem = nextDueLocal - nowLocal;
-            remainingText = FormatSpan(rem);
-            if (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) currentColor = "red"; else currentColor = "inherit";
-        }
-
-        StateHasChanged();
     }
+
+    // --- Final Countdown Calculation ---
+
+    // If no flight was found (either manually or automatically), exit early.
+    if (!hasDeparture || cfg == null)
+    {
+        activeFlightName = "";
+        remainingText = "00:00:00";
+        nextLabel = "No Flights";
+        StateHasChanged();
+        return;
+    }
+    
+    // Find the next upcoming milestone for the active flight
+    var bestLabel = "";
+    var bestDue = System.DateTime.MaxValue;
+
+    for (var i = 0; i < cfg.StringOffsetsMinutes.Length; i++)
+    {
+        var milestone = cfg.StringOffsetsMinutes[i];
+        var label = milestone.Label;
+        var due = DueTime(milestone.OffsetMinutes);
+        if (due >= nowLocal && due < bestDue)
+        {
+            bestDue = due;
+            bestLabel = label;
+        }
+    }
+
+    if (cfg.BellyCloseOffsetMinutes.HasValue)
+    {
+        var bellyDue = DueTime(cfg.BellyCloseOffsetMinutes.Value);
+        if (bellyDue >= nowLocal && bellyDue < bestDue)
+        {
+            bestDue = bellyDue;
+            bestLabel = "Belly Cans";
+        }
+    }
+
+    nextLabel = bestLabel;
+    nextDueLocal = bestDue;
+
+    if (string.IsNullOrEmpty(bestLabel))
+    {
+        remainingText = "00:00:00";
+        currentColor = "inherit";
+    }
+    else
+    {
+        var rem = nextDueLocal - nowLocal;
+        remainingText = FormatSpan(rem);
+        if (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) currentColor = "red";
+        else currentColor = "inherit";
+    }
+
+    StateHasChanged();
+}
 
     public void Dispose()
     {
