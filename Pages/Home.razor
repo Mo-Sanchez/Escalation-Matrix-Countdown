@@ -8,189 +8,349 @@
 @if (!kiosk)
 {
 <div class="tv-wrap">
-    <!-- Header -->
-    <div class="tv-header">
-        <h1 class="title">ULD Countdown</h1>
-        <div class="badges">
-            <div class="badge blue">Finger @selectedFinger</div>
-            <div class="badge green">@ActiveTypeName()</div>
-            @if (!string.IsNullOrEmpty(activeFlightName))
-            {
-                <div class="badge gold">@activeFlightName</div>
-            }
-        </div>
-    </div>
-
-    <!-- Controls -->
-    <div class="controls">
-        <span>Finger:</span>
-        <button @onclick="() => SetFinger(1)">1</button>
-        <button @onclick="() => SetFinger(2)">2</button>
-        <button @onclick="() => SetFinger(3)">3</button>
-
-        <span style="margin-left:12px">View Flight:</span>
-        <select @onchange="SelectFlight" class="flight-selector">
-            <option value="">Automatic (Default)</option>
-            @foreach (var flight in _allFlights.Where(x => x.IsActive && x.Finger == selectedFinger))
-            {
-                <option value="@flight.Id">@flight.Name - @flight.TimeOfDay</option>
-            }
-        </select>
-
-        <button style="margin-left:12px" @onclick="EnterKiosk">Enter Kiosk</button>
-    </div>
-
-    @if (hasDeparture && cfgRow != null)
-    {
-        <div class="tv-grid">
-            <!-- Left: Milestones table -->
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                        <tr><th>Milestone</th><th>Due</th><th>Remaining</th></tr>
-                    </thead>
-                    <tbody>
-
-                    @if (cfgRow.BellyCloseOffsetMinutes.HasValue)
-                    {
-                        var bellyDue = DueTime(cfgRow.BellyCloseOffsetMinutes.Value);
-                        var bellyRem = bellyDue - nowLocal;
-                        var bellyClass = (bellyRem.TotalSeconds >= 0 && bellyRem.TotalMinutes <= 10) ? "red" : "";
-                        <tr class="@bellyClass">
-                            <td>Belly Cans</td>
-                            <td>@bellyDue.ToString("HH:mm")</td>
-                            <td>@FormatSpan(bellyRem)</td>
-                        </tr>
-                    }
-
-                    @foreach (var m in milestones)
-                    {
-                        var due = DueTime(m.OffsetMinutes);
-                        var rem = due - nowLocal;
-                        var rowClass = (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) ? "red" : "";
-                        <tr class="@rowClass">
-                            <td>@m.Label</td>
-                            <td>@due.ToString("HH:mm")</td>
-                            <td>@FormatSpan(rem)</td>
-                        </tr>
-                    }
-
-                    @{
-                        var lcoDue = DueTime(cfgRow.LastCanOffsetMinutes);
-                        var lcoRem = lcoDue - nowLocal;
-                        var lcoClass = (lcoRem.TotalSeconds >= 0 && lcoRem.TotalMinutes <= 10) ? "red" : "";
-                    }
-                    <tr class="@lcoClass">
-                        <td>Last Can (LCO)</td>
-                        <td>@lcoDue.ToString("HH:mm")</td>
-                        <td>@FormatSpan(lcoRem)</td>
-                    </tr>
-                    </tbody>
-                </table>
+    <header class="tv-header">
+        <h1 class="title">Escalation Countdown</h1>
+        @if (selectedFinger != "All" && displayedFlights.Any())
+        {
+            <div class="badges">
+                <div class="badge blue"><i class="bi bi-signpost-split"></i> Finger @selectedFinger</div>
+                <div class="badge green"><i class="bi bi-airplane"></i> @displayedFlights.First().AircraftType</div>
+                <div class="badge gold"><i class="bi bi-tag"></i> @displayedFlights.First().FlightName</div>
             </div>
+        }
+    </header>
 
-            <!-- Right: Countdown + key facts -->
-            <div class="card">
-                <div class="subtle">Next Due: @nextLabel @nextDueLocal.ToString("HH:mm")</div>
-                <div class="countdown-big" style="color:@currentColor">@remainingText</div>
+    <div class="controls">
+        <div class="control-group">
+            <label>Finger:</label>
+            <div class="btn-group">
+                <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("1")'>1</button>
+                <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("2")'>2</button>
+                <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("3")'>3</button>
+                <button class="btn @(selectedFinger == "All" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SetFinger("All")'>All</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>View Flight:</label>
+            <select @onchange="SelectFlight" class="form-select flight-selector" disabled="@(selectedFinger == "All")" value="@manuallySelectedFlightID">
+                <option value="">Automatic (Default)</option>
+                @if (selectedFinger != "All")
+                {
+                    @foreach (var flight in _allFlights.Where(x => x.IsActive && x.Finger.ToString() == selectedFinger))
+                    {
+                        <option value="@flight.Id">@flight.Name - @flight.TimeOfDay</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="control-group ms-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="fourHourSwitch" @bind="showNextFourHoursOnly">
+                <label class="form-check-label" for="fourHourSwitch">Next 4 Hours Only</label>
+            </div>
+        </div>
+        <button class="btn btn-dark btn-kiosk" @onclick="EnterKiosk"><i class="bi bi-fullscreen"></i> Enter Kiosk</button>
+    </div>
 
-                <div style="height:12px"></div>
+    @if (selectedFinger != "All")
+    {
+        var flight = displayedFlights.FirstOrDefault();
+        if (flight != null)
+        {
+            <div class="tv-grid">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Milestone</th><th>Due</th><th>Remaining</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var milestone in flight.Milestones)
+                            {
+                                var rem = milestone.Due - nowLocal;
+                                var classes = new List<string>();
 
-                <div class="kv">
-                    <div class="k">Flight</div><div class="v">@activeFlightName</div>
-                    <div class="k">Aircraft</div><div class="v">@ActiveTypeName()</div>
-                    <div class="k">Departure</div><div class="v">@departureLocal.ToString("yyyy-MM-dd HH:mm")</div>
-                    <div class="k">Now</div><div class="v">@nowLocal.ToString("yyyy-MM-dd HH:mm:ss")</div>
+                                if (!string.IsNullOrWhiteSpace(flight.NextMilestoneLabel) && string.Equals(milestone.Label?.Trim(), flight.NextMilestoneLabel.Trim(), StringComparison.OrdinalIgnoreCase))
+                                {
+                                    classes.Add("is-next-milestone");
+                                }
+
+                                if (rem.TotalSeconds < 0)
+                                {
+                                    classes.Add("is-alert");
+                                }
+
+                                <tr class="@string.Join(" ", classes)">
+                                    <td>@milestone.Label</td>
+                                    <td>@milestone.Due.ToString("HH:mm")</td>
+                                    <td>@FormatSpan(rem)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card d-flex flex-column">
+                    <div class="subtle">Next Due: @flight.NextLabel @flight.NextDueLocal.ToString("HH:mm")</div>
+                    <div class="countdown-big" style="color:@flight.CurrentColor">@flight.RemainingText</div>
+                    <hr class="my-4">
+                    <div class="kv">
+                        <div class="kv-item"><i class="bi bi-tag"></i> <span class="k">Flight</span><span class="v">@flight.FlightName</span></div>
+                        <div class="kv-item"><i class="bi bi-airplane"></i> <span class="k">Aircraft</span><span class="v">@flight.AircraftType</span></div>
+                        <div class="kv-item"><i class="bi bi-calendar-event"></i> <span class="k">Departure</span><span class="v">@flight.DepartureLocal.ToString("yyyy-MM-dd HH:mm")</span></div>
+                        <div class="kv-item"><i class="bi bi-clock"></i> <span class="k">Now</span><span class="v">@nowLocal.ToString("yyyy-MM-dd HH:mm:ss")</span></div>
+                    </div>
                 </div>
             </div>
+        }
+        else
+        {
+            <div class="card text-center py-5">
+                <h2 class="text-muted">No active or upcoming flights for this finger.</h2>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="all-fingers-grid">
+            @foreach (var fingerGroup in displayedFlights.GroupBy(f => f.Finger).OrderBy(g => g.Key))
+            {
+                <div class="finger-column">
+                    <h2 class="finger-title">Finger @fingerGroup.Key</h2>
+                    @if (fingerGroup.Any())
+                    {
+                        @foreach (var flight in fingerGroup.OrderBy(f => f.DepartureLocal))
+                        {
+                            <div class="card flight-card">
+                                <div class="flight-card-header">
+                                    <span class="flight-name">@flight.FlightName</span>
+                                    <span class="aircraft-type">@flight.AircraftType</span>
+                                </div>
+                                <div class="flight-card-body">
+                                    <div class="flight-countdown" style="color:@flight.CurrentColor">@flight.RemainingText</div>
+                                    <div class="flight-subtle">Next: @flight.NextLabel (@flight.NextDueLocal.ToString("HH:mm"))</div>
+                                </div>
+                                <div class="flight-card-footer">
+                                    Departs: @flight.DepartureLocal.ToString("HH:mm")
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="card flight-card-empty">No flights</div>
+                    }
+                </div>
+            }
         </div>
     }
 </div>
 }
 else
 {
-<div class="kiosk">
-    <div class="extraSmall muted">Finger @selectedFinger</div>
-    <div class="small">@activeFlightName • @ActiveTypeName()</div>
-    <div class="mid muted">Next: @nextLabel @nextDueLocal.ToString("HH:mm")</div>
-    <div class="big" style="color:@currentColor">@remainingText</div>
-
-    <div style="margin-top:18px">
-        <button @onclick="ExitKiosk">Exit Kiosk</button>
-        <button @onclick="() => SetFinger(1)">1</button>
-        <button @onclick="() => SetFinger(2)">2</button>
-        <button @onclick="() => SetFinger(3)">3</button>
+    @* Kiosk Mode *@
+    var flight = displayedFlights.FirstOrDefault();
+    <div class="kiosk-container kiosk">
+        <div class="extraSmall muted">Finger @selectedFinger</div>
+        @if (flight != null)
+        {
+            <div class="small">@flight.FlightName • @flight.AircraftType</div>
+            <div class="mid muted">Next: @flight.NextLabel @flight.NextDueLocal.ToString("HH:mm")</div>
+            <div class="big" style="color:@flight.CurrentColor">@flight.RemainingText</div>
+        }
+        <div class="kiosk-controls">
+            <button class="btn btn-secondary" @onclick="ExitKiosk">Exit Kiosk</button>
+            <button class="btn @(selectedFinger == "1" ? "btn-primary" : "btn-outline-light")" @onclick='() => SetFinger("1")'>1</button>
+            <button class="btn @(selectedFinger == "2" ? "btn-primary" : "btn-outline-light")" @onclick='() => SetFinger("2")'>2</button>
+            <button class="btn @(selectedFinger == "3" ? "btn-primary" : "btn-outline-light")" @onclick='() => SetFinger("3")'>3</button>
+        </div>
     </div>
-</div>
 }
 
 @code {
-    private string? manuallySelectedFlightID = null;
+    public class FlightDisplayInfo
+    {
+        public string FlightName { get; set; } = "";
+        public string AircraftType { get; set; } = "";
+        public DateTime DepartureLocal { get; set; }
+        public string RemainingText { get; set; } = "00:00:00";
+        public string CurrentColor { get; set; } = "inherit";
+        public string NextLabel { get; set; } = "N/A";
+        public string NextMilestoneLabel { get; set; } = "";
+        public DateTime NextDueLocal { get; set; }
+        public int Finger { get; set; }
+        public List<MilestoneInfo> Milestones { get; set; } = new();
+    }
+    public class MilestoneInfo
+    {
+        public string Label { get; set; } = "";
+        public DateTime Due { get; set; }
+    }
 
-    private string activeFlightName = "";
-    private int selectedFinger = 1;
+    private string? manuallySelectedFlightID = "";
+    private string selectedFinger = "1";
     private bool kiosk = false;
+    private bool showNextFourHoursOnly = false;
 
     private List<Flight> _allFlights = new();
-    private List<AircraftMilestoneRow> milestones = new();
-    private AircraftConfigRow? cfgRow;
-
-    private AircraftType activeType = AircraftType.B767_300;
-
-    private DateTime departureLocal;
-    private bool hasDeparture;
+    private List<FlightDisplayInfo> displayedFlights = new();
+    // REMOVED: No longer need a separate dictionary for configs
+    // private Dictionary<string, AircraftConfigRow> _configs = new(); 
+    private Dictionary<string, List<AircraftMilestoneRow>> _milestones = new();
 
     private DateTime nowLocal = DateTime.Now;
-    private string nextLabel = "";
-    private DateTime nextDueLocal;
-    private string remainingText = "";
-    private string currentColor = "inherit";
-
     private System.Timers.Timer t = new(1000);
-
-    // cache to avoid reloading config/milestones unnecessarily
-    private string? lastLoadedTypeKey = null;
 
     protected override async Task OnInitializedAsync()
     {
         _allFlights = (await Flights.GetAll()).ToList();
+        
+        var types = new[] { "B767_300", "B737_800" };
+        foreach (var typeKey in types)
+        {
+            // REMOVED: No longer loading configs
+            // _configs[typeKey] = await Flights.GetAircraftConfigAsync(typeKey);
+            _milestones[typeKey] = (await Flights.GetMilestonesAsync(typeKey)).OrderBy(m => m.OffsetMinutes).ToList();
+        }
 
         t.Elapsed += async (_, __) => await InvokeAsync(Tick);
         t.AutoReset = true;
         t.Enabled = true;
     }
 
-    private void EnterKiosk()
-    {
-        kiosk = true;
-        JS.InvokeVoidAsync("kiosk.enter");
-    }
-
-    private void ExitKiosk()
-    {
-        kiosk = false;
-        JS.InvokeVoidAsync("kiosk.exit");
-    }
+    private void EnterKiosk() { kiosk = true; JS.InvokeVoidAsync("kiosk.enter"); }
+    private void ExitKiosk() { kiosk = false; JS.InvokeVoidAsync("kiosk.exit"); }
 
     private void SelectFlight(ChangeEventArgs e)
     {
-        var selectedId = e.Value?.ToString();
-
-        if (string.IsNullOrEmpty(selectedId))
-            manuallySelectedFlightID = null;
-        else
-            manuallySelectedFlightID = selectedId;
+        manuallySelectedFlightID = e.Value?.ToString();
     }
 
-    private void SetFinger(int f)
+    private void SetFinger(string f)
     {
         selectedFinger = f;
-        hasDeparture = false;
-        activeFlightName = "";
-        manuallySelectedFlightID = null;
+        manuallySelectedFlightID = "";
     }
 
-    private DateTime DueTime(int offsetMin) => departureLocal.AddMinutes(offsetMin);
+    private async Task Tick()
+    {
+        nowLocal = DateTime.Now;
+        var newDisplayList = new List<FlightDisplayInfo>();
+        var flightsToConsider = _allFlights.Where(x => x.IsActive).ToList();
+
+        if (selectedFinger != "All")
+        {
+            flightsToConsider = flightsToConsider.Where(f => f.Finger.ToString() == selectedFinger).ToList();
+        }
+
+        if (!string.IsNullOrEmpty(manuallySelectedFlightID) && Guid.TryParse(manuallySelectedFlightID, out var selectedGuid))
+        {
+            var manualFlight = flightsToConsider.FirstOrDefault(f => f.Id == selectedGuid);
+            if (manualFlight != null && TryParseTod(manualFlight.TimeOfDay, out var tod))
+            {
+                var departure = new DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, tod.Hour, tod.Minute, 0);
+                if (departure.AddMinutes(5) < nowLocal) departure = departure.AddDays(1);
+                newDisplayList.Add(CalculateDisplayInfo(manualFlight, departure));
+            }
+        }
+        else
+        {
+            var candidates = new List<(Flight flight, DateTime departure)>();
+            foreach (var f in flightsToConsider)
+            {
+                if (!TryParseTod(f.TimeOfDay, out var tod)) continue;
+
+                var occToday = new DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, tod.Hour, tod.Minute, 0);
+                var occTomorrow = occToday.AddDays(1);
+                
+                var typeKey = f.Type == AircraftType.B737_800 ? "B737_800" : "B767_300";
+                if(!_milestones.ContainsKey(typeKey) || !_milestones[typeKey].Any()) continue;
+
+                // MODIFIED: Determine the start window from the earliest milestone instead of the config
+                var earliestOffset = _milestones[typeKey].First().OffsetMinutes;
+                var startWindow = occToday.AddMinutes(earliestOffset);
+                var graceEnd = occToday.AddMinutes(5);
+
+                if (nowLocal >= startWindow && nowLocal <= graceEnd) {
+                    candidates.Add((f, occToday));
+                } else if (occToday > nowLocal) {
+                    candidates.Add((f, occToday));
+                } else {
+                    candidates.Add((f, occTomorrow));
+                }
+            }
+            
+            if (selectedFinger != "All" && candidates.Any())
+            {
+                var bestCandidate = candidates.OrderBy(c => c.departure).First();
+                newDisplayList.Add(CalculateDisplayInfo(bestCandidate.flight, bestCandidate.departure));
+            }
+            else if (selectedFinger == "All")
+            {
+                var distinctCandidates = candidates.GroupBy(c => c.flight.Id).Select(g => g.OrderBy(c => c.departure).First());
+                foreach (var candidate in distinctCandidates)
+                {
+                    newDisplayList.Add(CalculateDisplayInfo(candidate.flight, candidate.departure));
+                }
+            }
+        }
+
+        if (showNextFourHoursOnly)
+        {
+            newDisplayList = newDisplayList.Where(f => f.DepartureLocal <= nowLocal.AddHours(4) && f.DepartureLocal >= nowLocal).ToList();
+        }
+
+        displayedFlights = newDisplayList;
+        StateHasChanged();
+    }
+
+    // MODIFIED: This method is now much simpler
+    private FlightDisplayInfo CalculateDisplayInfo(Flight flight, DateTime departureLocal)
+    {
+        var typeKey = flight.Type == AircraftType.B737_800 ? "B737_800" : "B767_300";
+        var milestones = _milestones.GetValueOrDefault(typeKey, new List<AircraftMilestoneRow>());
+
+        var allMilestones = new List<MilestoneInfo>();
+        string bestLabel = "";
+        DateTime bestDue = DateTime.MaxValue;
+        
+        // A single loop now handles all milestones
+        foreach(var m in milestones)
+        {
+            var due = departureLocal.AddMinutes(m.OffsetMinutes);
+            allMilestones.Add(new MilestoneInfo { Label = m.Label, Due = due });
+
+            // Check if this is the next upcoming milestone
+            if (due >= nowLocal && due < bestDue)
+            {
+                bestDue = due;
+                bestLabel = m.Label;
+            }
+        }
+
+        var remainingText = "00:00:00";
+        var currentColor = "inherit";
+
+        if (!string.IsNullOrEmpty(bestLabel))
+        {
+            var rem = bestDue - nowLocal;
+            remainingText = FormatSpan(rem);
+            currentColor = (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) ? "red" : "inherit";
+        }
+
+        return new FlightDisplayInfo
+        {
+            FlightName = flight.Name,
+            AircraftType = flight.Type.ToString(),
+            DepartureLocal = departureLocal,
+            Finger = flight.Finger,
+            NextLabel = bestLabel,
+            NextMilestoneLabel = bestLabel,
+            NextDueLocal = bestDue,
+            RemainingText = remainingText,
+            CurrentColor = currentColor,
+            Milestones = allMilestones // The list is already sorted by due time from the OffsetMinutes sort
+        };
+    }
 
     private static string FormatSpan(TimeSpan ts)
     {
@@ -199,198 +359,12 @@ else
         return sign + abs.Hours.ToString("00") + ":" + abs.Minutes.ToString("00") + ":" + abs.Seconds.ToString("00");
     }
 
-    private string ActiveTypeName()
-    {
-        if (activeType == AircraftType.B737_800) return "B737_800";
-        return "B767_300";
-    }
-
     private static bool TryParseTod(string? s, out DateTime tod)
     {
         tod = default;
         if (string.IsNullOrWhiteSpace(s)) return false;
-        return DateTime.TryParseExact(
-            s.Trim(),
-            new[] { "HH:mm", "HH:mm:ss" },
-            CultureInfo.InvariantCulture,
-            DateTimeStyles.None,
-            out tod
-        );
+        return DateTime.TryParseExact(s.Trim(), new[] { "HH:mm", "HH:mm:ss" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out tod);
     }
-
-    private async Task EnsureConfigLoadedAsync(AircraftType type)
-    {
-        var key = type == AircraftType.B737_800 ? "B737_800" : "B767_300";
-        if (lastLoadedTypeKey == key && cfgRow != null && milestones.Count > 0) return;
-
-        cfgRow = await Flights.GetAircraftConfigAsync(key);
-        milestones = (await Flights.GetMilestonesAsync(key))
-            .OrderBy(m => m.SortOrder)
-            .ToList();
-
-        lastLoadedTypeKey = key;
-    }
-
-    private async Task Tick()
-    {
-        nowLocal = DateTime.Now;
-
-        var flights = _allFlights.Where(x => x.IsActive && x.Finger == selectedFinger).ToList();
-
-        // Manual selection
-        if (!string.IsNullOrEmpty(manuallySelectedFlightID) && Guid.TryParse(manuallySelectedFlightID, out var selectedGuid))
-        {
-            var manualFlight = flights.FirstOrDefault(f => f.Id == selectedGuid);
-            if (manualFlight != null && TryParseTod(manualFlight.TimeOfDay, out var todParsed))
-            {
-                var occToday = new DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, todParsed.Hour, todParsed.Minute, 0);
-                if (occToday < nowLocal) occToday = occToday.AddDays(1);
-
-                departureLocal = occToday;
-                hasDeparture = true;
-                activeFlightName = manualFlight.Name;
-                activeType = manualFlight.Type;
-
-                await EnsureConfigLoadedAsync(activeType);
-            }
-            else
-            {
-                manuallySelectedFlightID = null; // fallback to auto
-            }
-        }
-        else
-        {
-            // Auto selection
-            DateTime? currentOcc = null;
-            string currentName = "";
-            AircraftType currentType = AircraftType.B767_300;
-
-            DateTime? nextOcc = null;
-            string nextName = "";
-            AircraftType nextType = AircraftType.B767_300;
-
-            for (var i = 0; i < flights.Count; i++)
-            {
-                var f = flights[i];
-                if (!TryParseTod(f.TimeOfDay, out var todParsed)) continue;
-
-                var occToday = new DateTime(nowLocal.Year, nowLocal.Month, nowLocal.Day, todParsed.Hour, todParsed.Minute, 0);
-
-                // We need config to compute the active window start; use cached or fetch once per type we test
-                var typeKey = f.Type == AircraftType.B737_800 ? "B737_800" : "B767_300";
-                var tmpCfg = (lastLoadedTypeKey == typeKey && cfgRow != null)
-                    ? cfgRow
-                    : await Flights.GetAircraftConfigAsync(typeKey);
-
-                // If no config yet, assume strings start at -90 as a defensive default
-                var firstOffset = -90;
-                if (tmpCfg != null)
-                {
-                    // best-effort: if milestones cached mismatch type, we don't rely on them here
-                    firstOffset = tmpCfg.LastCanOffsetMinutes < -90 ? tmpCfg.LastCanOffsetMinutes : -90;
-                }
-
-                var startWindow = occToday.AddMinutes(firstOffset); // earliest milestone (rough guard)
-                var lco = occToday.AddMinutes(tmpCfg?.LastCanOffsetMinutes ?? -30);
-                var graceEnd = lco.AddMinutes(5);
-
-                if (nowLocal >= startWindow && nowLocal <= graceEnd)
-                {
-                    if (!currentOcc.HasValue || occToday > currentOcc.Value)
-                    {
-                        currentOcc = occToday;
-                        currentName = f.Name;
-                        currentType = f.Type;
-                    }
-                }
-                else
-                {
-                    var candidate = nowLocal < startWindow ? occToday : occToday.AddDays(1);
-                    if (!nextOcc.HasValue || candidate < nextOcc.Value)
-                    {
-                        nextOcc = candidate;
-                        nextName = f.Name;
-                        nextType = f.Type;
-                    }
-                }
-            }
-
-            if (currentOcc.HasValue)
-            {
-                departureLocal = currentOcc.Value;
-                hasDeparture = true;
-                activeFlightName = currentName;
-                activeType = currentType;
-                await EnsureConfigLoadedAsync(activeType);
-            }
-            else if (nextOcc.HasValue)
-            {
-                departureLocal = nextOcc.Value;
-                hasDeparture = true;
-                activeFlightName = nextName;
-                activeType = nextType;
-                await EnsureConfigLoadedAsync(activeType);
-            }
-            else
-            {
-                hasDeparture = false;
-            }
-        }
-
-        // --- Final Countdown Calculation ---
-        if (!hasDeparture || cfgRow == null)
-        {
-            activeFlightName = "";
-            remainingText = "00:00:00";
-            nextLabel = "No Flights";
-            StateHasChanged();
-            return;
-        }
-
-        // Determine next milestone
-        string bestLabel = "";
-        DateTime bestDue = DateTime.MaxValue;
-
-        foreach (var m in milestones)
-        {
-            var due = DueTime(m.OffsetMinutes);
-            if (due >= nowLocal && due < bestDue)
-            {
-                bestDue = due;
-                bestLabel = m.Label;
-            }
-        }
-
-        if (cfgRow.BellyCloseOffsetMinutes.HasValue)
-        {
-            var bellyDue = DueTime(cfgRow.BellyCloseOffsetMinutes.Value);
-            if (bellyDue >= nowLocal && bellyDue < bestDue)
-            {
-                bestDue = bellyDue;
-                bestLabel = "Belly Cans";
-            }
-        }
-
-        nextLabel = bestLabel;
-        nextDueLocal = bestDue;
-
-        if (string.IsNullOrEmpty(bestLabel))
-        {
-            remainingText = "00:00:00";
-            currentColor = "inherit";
-        }
-        else
-        {
-            var rem = nextDueLocal - nowLocal;
-            remainingText = FormatSpan(rem);
-            currentColor = (rem.TotalSeconds >= 0 && rem.TotalMinutes <= 10) ? "red" : "inherit";
-        }
-
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        t?.Dispose();
-    }
+    
+    public void Dispose() => t?.Dispose();
 }

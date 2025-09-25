@@ -158,27 +158,13 @@ else
                 </select>
             </div>
             <button @onclick="LoadEscAsync">Load</button>
-            <button @onclick="SaveEscConfig">Save Config</button>
             <button @onclick="AddEscMilestone">Add Milestone</button>
             @if (escLoading)
             {
                 <span style="opacity:.6">Loading…</span>
             }
         </div>
-
-        <div style="border:1px solid #ccc; border-radius:8px; padding:12px; margin-bottom:12px">
-            <h4 style="margin:0 0 8px 0">Config</h4>
-            <div style="display:flex; gap:12px; flex-wrap:wrap">
-                <div>
-                    <label>Last Can Offset (min)</label><br />
-                    <input type="number" @bind="escCfg.LastCanOffsetMinutes" />
-                </div>
-                <div>
-                    <label>Belly Close Offset (min) (optional)</label><br />
-                    <input type="number" @bind="escCfg.BellyCloseOffsetMinutes" />
-                </div>
-            </div>
-        </div>
+        
 
         <div style="border:1px solid #ccc; border-radius:8px; padding:12px">
             <h4 style="margin:0 0 8px 0">Milestones</h4>
@@ -355,7 +341,6 @@ else
 
     // ---------- Escalation Times ----------
     private string escAircraft = "B737_800";
-    private AircraftConfigRow escCfg = new AircraftConfigRow { Aircraft = "B737_800" };
     private List<AircraftMilestoneRow> escMilestones = new();
     private bool escLoading = false;
 
@@ -364,18 +349,12 @@ else
     private async Task LoadEscAsync()
     {
         escLoading = true;
-        escCfg = await Flights.GetAircraftConfigAsync(escAircraft);
         escMilestones = (await Flights.GetMilestonesAsync(escAircraft)).ToList();
         escLoading = false;
         StateHasChanged();
     }
 
-    private async Task SaveEscConfig()
-    {
-        escCfg.Aircraft = escAircraft;
-        await Flights.SaveAircraftConfigAsync(escCfg);
-        await LoadEscAsync();
-    }
+
 
     private async Task AddEscMilestone()
     {
